@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using NLog;
+﻿using NLog;
 using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ScheduleClassBot.Processors;
 internal class GetSchedule
@@ -18,23 +16,11 @@ internal class GetSchedule
     public static string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
     public static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
 
-    internal static async Task GetButtonForGroupPMI(ITelegramBotClient botClient, Message message)
+    internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, string nameGroup)
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"Вы выбрали группу ПМИ-120!", replyMarkup: BotButtons.GroupPMI());
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error on Exchange Rate. Error message: {ex.Message}");
-        }
-    }
-
-    internal static async Task GetButtonForGroupPRI(ITelegramBotClient botClient, Message message)
-    {
-        try
-        {
-            await botClient.SendTextMessageAsync(message.Chat, $"Вы выбрали группу ПРИ-121!", replyMarkup: BotButtons.GroupPRI());
+            await botClient.SendTextMessageAsync(message.Chat, $"Вы выбрали группу {nameGroup}!", replyMarkup: BotButtons.AllGroup(nameGroup));
         }
         catch (Exception ex)
         {
@@ -46,10 +32,7 @@ internal class GetSchedule
     {
         try
         {
-            if (_numeratorAndDenominator == 0)
-                _text = $"Текущая неделя: {_denominator}\n\n";
-            else
-                _text = $"Текущая неделя: {_numerator}\n\n";
+            _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
 
             if (dayOfWeekPMI.Contains(textMessage))
             {
@@ -113,10 +96,7 @@ internal class GetSchedule
     {
         try
         {
-            if (_numeratorAndDenominator == 0)
-                _text = $"Текущая неделя: {_denominator}\n\n";
-            else
-                _text = $"Текущая неделя: {_numerator}\n\n";
+            _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
 
             if (dayOfWeekPRI.Contains(textMessage))
             {

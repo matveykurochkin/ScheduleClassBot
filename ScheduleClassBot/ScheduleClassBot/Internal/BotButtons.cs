@@ -34,44 +34,22 @@ internal class BotButtons
         return tgButton;
     }
 
-    public static IReplyMarkup GroupPMI()
+    public static IReplyMarkup AllGroup(string nameGroup)
     {
         var tgButton = new ReplyKeyboardMarkup(new[]
         {
     new[]
     {
-        new KeyboardButton("Понедельник ПМИ-120"),
-        new KeyboardButton("Вторник ПМИ-120")
+        new KeyboardButton($"Понедельник {nameGroup}"),
+        new KeyboardButton($"Вторник {nameGroup}")
     },new[]
     {
-        new KeyboardButton("Среда ПМИ-120"),
-        new KeyboardButton("Четверг ПМИ-120")
+        new KeyboardButton($"Среда {nameGroup}"),
+        new KeyboardButton($"Четверг {nameGroup}")
     },new[]
     {
-        new KeyboardButton("Пятница ПМИ-120"),
-        new KeyboardButton("Список групп 📋")
-    }
-     });
-        tgButton.ResizeKeyboard = true;
-        return tgButton;
-    }
-
-    public static IReplyMarkup GroupPRI()
-    {
-        var tgButton = new ReplyKeyboardMarkup(new[]
-        {
-    new[]
-    {
-        new KeyboardButton("Понедельник ПРИ-121"),
-        new KeyboardButton("Вторник ПРИ-121")
-    },new[]
-    {
-        new KeyboardButton("Среда ПРИ-121"),
-        new KeyboardButton("Четверг ПРИ-121")
-    },new[]
-    {
-        new KeyboardButton("Пятница ПРИ-121"),
-        new KeyboardButton("Список групп 📋")
+        new KeyboardButton($"Пятница {nameGroup}"),
+        new KeyboardButton($"Список групп 📋")
     }
      });
         tgButton.ResizeKeyboard = true;

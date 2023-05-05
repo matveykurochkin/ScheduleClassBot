@@ -33,14 +33,9 @@ internal class ProcessingMessage
                     await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список групп!", replyMarkup: BotButtons.ListGroup(), cancellationToken: cancellationToken);
                     return;
                 }
-                if (message?.Text == "ПМИ-120")
+                if (message?.Text == "ПМИ-120" || message?.Text == "ПРИ-121")
                 {
-                    await GetSchedule.GetButtonForGroupPMI(botClient, message);
-                    return;
-                }
-                if (message?.Text == "ПРИ-121")
-                {
-                    await GetSchedule.GetButtonForGroupPRI(botClient, message);
+                    await GetSchedule.GetButtonForGroup(botClient, message, message?.Text!);
                     return;
                 }
                 if (GetSchedule.dayOfWeekPMI.Contains(message!.Text))
@@ -61,7 +56,7 @@ internal class ProcessingMessage
 
     public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        _logger.Error(exception, "Error received in telegram bot");
+        _logger.Error(exception, $"Error received in telegram bot, name of bot: {botClient.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName}");
         return Task.CompletedTask;
     }
 }

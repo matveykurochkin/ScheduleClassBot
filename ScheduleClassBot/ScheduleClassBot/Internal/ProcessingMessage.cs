@@ -66,7 +66,7 @@ internal class ProcessingMessage
                 }
                 if (message?.Text == "ПМИ-120" || message?.Text == "ПРИ-121")
                 {
-                    await GetSchedule.GetButtonForGroup(botClient, message, message?.Text!);
+                    await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
                     return;
                 }
                 if (GetSchedule.dayOfWeekPMI.Contains(message!.Text))

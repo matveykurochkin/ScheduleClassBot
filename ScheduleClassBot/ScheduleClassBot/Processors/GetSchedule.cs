@@ -16,11 +16,11 @@ internal class GetSchedule
     public static string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
     public static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
 
-    internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, string nameGroup)
+    internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update, string nameGroup)
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"Вы выбрали группу {nameGroup}!", replyMarkup: BotButtons.AllGroup(nameGroup));
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, ты выбрал(а) группу {nameGroup}!", replyMarkup: BotButtons.AllGroup(nameGroup));
         }
         catch (Exception ex)
         {

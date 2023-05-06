@@ -7,6 +7,35 @@ namespace ScheduleClassBot.Internal;
 internal class ProcessingMessage
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
+
+    public static void UserList(string name, string surname, long? id)
+    {
+        try
+        {
+            string path = Path.Combine(projectPath, "ListUsers.txt");
+            string fileContent, userInfo = $"User Info: {name} {surname} ID: {id}\n";
+
+            if (!System.IO.File.Exists(path))
+            {
+                System.IO.File.WriteAllText(path, userInfo);
+                _logger.Info("Saved First user!");
+            }
+            else
+            {
+                fileContent = System.IO.File.ReadAllText(path);
+                if (!fileContent.Contains(userInfo))
+                {
+                    System.IO.File.AppendAllText(path, userInfo);
+                    _logger.Info("Saved new user!");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Error saved user. Error message: {ex.Message}");
+        }
+    }
 
     public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
@@ -15,6 +44,8 @@ internal class ProcessingMessage
             var message = update.Message;
 
             _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал боту данное сообщение: {message?.Text}\n id Пользователя: {message?.From?.Id}");
+
+            UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Id);
 
             if (message?.Text is not null)
             {

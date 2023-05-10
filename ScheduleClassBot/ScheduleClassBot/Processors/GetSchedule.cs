@@ -11,10 +11,26 @@ internal class GetSchedule
     private static int _weekNumber = ISOWeek.GetWeekOfYear(DateTime.Now);
     private static int _numeratorAndDenominator = _weekNumber % 2;
     private static string _numerator = "ЧИСЛИТЕЛЬ", _denominator = "ЗНАМЕНАТЕЛЬ", _text = "";
+    private static DayOfWeek today = DateTime.Now.DayOfWeek;
 
+    internal static string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
+    internal static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
+    private static string[] dayOfWeek = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
-    public static string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
-    public static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
+    public static string GetTodaySchedule( string[] dayArr)
+    {
+        int todayIndex = Array.IndexOf(dayOfWeek, today.ToString());
+
+        if (todayIndex >= dayArr.Length)
+        {
+            _text += $"❗❗❗Выходные, показано расписание на понедельник!❗❗❗\n\n";
+            return dayArr[0];
+        }
+        else
+        {
+            return dayArr[todayIndex];
+        }
+    }
 
     internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update, string nameGroup)
     {
@@ -33,6 +49,9 @@ internal class GetSchedule
         try
         {
             _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
+
+            if (textMessage == "Расписание на сегодня ПМИ-120")
+                textMessage = GetTodaySchedule(dayOfWeekPMI);
 
             if (dayOfWeekPMI.Contains(textMessage))
             {
@@ -97,6 +116,9 @@ internal class GetSchedule
         try
         {
             _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
+
+            if (textMessage == "Расписание на сегодня ПРИ-121")
+                textMessage = GetTodaySchedule(dayOfWeekPRI);
 
             if (dayOfWeekPRI.Contains(textMessage))
             {

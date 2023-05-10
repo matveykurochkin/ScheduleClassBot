@@ -69,17 +69,16 @@ internal class ProcessingMessage
                     await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text))
+                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПМИ-120")
                 {
                     await GetSchedule.GetScheduleForGroupPMI(botClient, message, message!.Text);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text))
+                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПРИ-121")
                 {
                     await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
                     return;
                 }
-
                 await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!", cancellationToken: cancellationToken);
             }
         }

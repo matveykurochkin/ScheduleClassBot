@@ -49,6 +49,9 @@ internal class BotButtons
     },new[]
     {
         new KeyboardButton($"Пятница {nameGroup}"),
+        new KeyboardButton($"Расписание на сегодня {nameGroup}")
+    },new[]
+    {
         new KeyboardButton($"Список групп 📋")
     }
      });

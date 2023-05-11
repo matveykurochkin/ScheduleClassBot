@@ -12,7 +12,7 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
 		<PackageReference Include="NLog" Version="5.1.4" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
-		<PackageReference Include="Telegram.Bot" Version="18.0.0" />
+		<PackageReference Include="Telegram.Bot" Version="19.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -23,13 +23,11 @@ internal class GetSchedule
 
         if (todayIndex >= dayArr.Length)
         {
-            _text += $"❗❗❗Выходные, показано расписание на понедельник!❗❗❗\n\n";
+            _text += $"❗Выходные, показано расписание на понедельник!❗\n\n";
             return dayArr[0];
         }
         else
-        {
             return dayArr[todayIndex];
-        }
     }
 
     internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update, string nameGroup)
@@ -48,7 +46,7 @@ internal class GetSchedule
     {
         try
         {
-            _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
+            _text = _numeratorAndDenominator == 0 ? $"❗Текущая неделя: {_denominator}❗\n\n" : $"❗Текущая неделя: {_numerator}❗\n\n";
 
             if (textMessage == "Расписание на сегодня ПМИ-120")
                 textMessage = GetTodaySchedule(dayOfWeekPMI);
@@ -115,7 +113,7 @@ internal class GetSchedule
     {
         try
         {
-            _text = _numeratorAndDenominator == 0 ? $"Текущая неделя: {_denominator}\n\n" : $"Текущая неделя: {_numerator}\n\n";
+            _text = _numeratorAndDenominator == 0 ? $"❗Текущая неделя: {_denominator}❗\n\n" : $"❗Текущая неделя: {_numerator}❗\n\n";
 
             if (textMessage == "Расписание на сегодня ПРИ-121")
                 textMessage = GetTodaySchedule(dayOfWeekPRI);

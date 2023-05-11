@@ -79,6 +79,11 @@ internal class ProcessingMessage
                     await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
                     return;
                 }
+                if (message?.Text == "specialcommandforviewlistusers")
+                {
+                    await GetUserList.GetUsersList(botClient, update, message, cancellationToken);
+                    return;
+                }
                 await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!", cancellationToken: cancellationToken);
             }
         }

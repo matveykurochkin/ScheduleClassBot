@@ -17,7 +17,7 @@ internal class GetSchedule
     internal static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
     private static string[] dayOfWeek = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
-    public static string GetTodaySchedule( string[] dayArr)
+    public static string GetTodaySchedule(string[] dayArr)
     {
         int todayIndex = Array.IndexOf(dayOfWeek, today.ToString());
 
@@ -38,7 +38,7 @@ internal class GetSchedule
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error on Exchange Rate. Error message: {ex.Message}");
+            _logger.Error($"Error view button for all group. Error message: {ex.Message}");
         }
     }
 
@@ -48,7 +48,7 @@ internal class GetSchedule
         {
             _text = _numeratorAndDenominator == 0 ? $"❗Текущая неделя: {_denominator}❗\n\n" : $"❗Текущая неделя: {_numerator}❗\n\n";
 
-            if (textMessage == "Расписание на сегодня ПМИ-120")
+            if (textMessage == "Расписание на сегодня ПМИ-120" || textMessage == "/todaypmi")
                 textMessage = GetTodaySchedule(dayOfWeekPMI);
 
             if (dayOfWeekPMI.Contains(textMessage))
@@ -105,7 +105,7 @@ internal class GetSchedule
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error on Exchange Rate. Error message: {ex.Message}");
+            _logger.Error($"Error view schedule for group PMI. Error message: {ex.Message}");
         }
     }
 
@@ -115,7 +115,7 @@ internal class GetSchedule
         {
             _text = _numeratorAndDenominator == 0 ? $"❗Текущая неделя: {_denominator}❗\n\n" : $"❗Текущая неделя: {_numerator}❗\n\n";
 
-            if (textMessage == "Расписание на сегодня ПРИ-121")
+            if (textMessage == "Расписание на сегодня ПРИ-121" || textMessage == "/todaypri")
                 textMessage = GetTodaySchedule(dayOfWeekPRI);
 
             if (dayOfWeekPRI.Contains(textMessage))
@@ -180,7 +180,7 @@ internal class GetSchedule
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error on Exchange Rate. Error message: {ex.Message}");
+            _logger.Error($"Error view schedule for group PRI. Error message: {ex.Message}");
         }
     }
 }

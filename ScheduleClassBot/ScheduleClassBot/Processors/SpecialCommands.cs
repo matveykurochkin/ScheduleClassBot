@@ -4,11 +4,11 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace ScheduleClassBot.Processors;
-internal class GetUserList
+internal class SpecialCommands
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
-
+    internal static long countMessage = 0;
     public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
@@ -27,17 +27,30 @@ internal class GetUserList
                 }
 
                 await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список пользователей:\n{fileContent}", cancellationToken: cancellationToken);
-                _logger.Info($"SPECIAL COMMAND!!! View users list success!");
+                _logger.Info($"!!!SPECIAL COMMAND!!! View users list success!");
             }
             else
             {
                 await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, пользователей нет!", cancellationToken: cancellationToken);
-                _logger.Info($"SPECIAL COMMAND!!! Error view users list success!");
+                _logger.Info($"!!!SPECIAL COMMAND!!! Error view users list success!");
             }
         }
         catch (Exception ex)
         {
-            _logger.Error($"SPECIAL COMMAND!!! Error view users list. Error message: {ex.Message}");
+            _logger.Error($"!!!SPECIAL COMMAND!!! Error view users list. Error message: {ex.Message}");
+        }
+    }
+
+    public static async Task GetCountMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, количество написанных сообщений боту: {countMessage}!", cancellationToken: cancellationToken);
+            _logger.Info($"!!!SPECIAL COMMAND!!! View count message success!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"!!!SPECIAL COMMAND!!! Error view count message. Error message: {ex.Message}");
         }
     }
 }

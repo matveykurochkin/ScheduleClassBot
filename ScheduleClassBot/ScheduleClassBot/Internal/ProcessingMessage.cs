@@ -8,7 +8,6 @@ internal class ProcessingMessage
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
-
     public static void UserList(string name, string surname, long? id)
     {
         try
@@ -46,6 +45,7 @@ internal class ProcessingMessage
             _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал боту данное сообщение: {message?.Text}\n id Пользователя: {message?.From?.Id}");
 
             UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Id);
+            SpecialCommands.countMessage++;
 
             if (message?.Text is not null)
             {
@@ -56,7 +56,9 @@ internal class ProcessingMessage
                         $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                         $"Доступные команды:\n" +
                         $"/start - команда для обновления бота\n" +
-                        $"/listgroup - команда для просмотра списка групп", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                        $"/listgroup - команда для просмотра списка групп\n" +
+                        $"/todaypmi - команда для просмотра расписания на сегодня группы ПМИ-120\n" +
+                        $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
                 if (message?.Text == "Узнать расписание 📜" || message?.Text == "Список групп 📋" || message?.Text == "/listgroup")
@@ -69,23 +71,30 @@ internal class ProcessingMessage
                     await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПМИ-120")
+                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПМИ-120" || message?.Text == "/todaypmi")
                 {
                     await GetSchedule.GetScheduleForGroupPMI(botClient, message, message!.Text);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПРИ-121")
+                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПРИ-121" || message?.Text == "/todaypri")
                 {
                     await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
                     return;
                 }
                 if (message?.Text == "specialcommandforviewlistusers")
                 {
-                    await GetUserList.GetUsersList(botClient, update, message, cancellationToken);
+                    await SpecialCommands.GetUsersList(botClient, update, message, cancellationToken);
+                    return;
+                }
+                if (message?.Text == "specialcommandforviewcountmessages")
+                {
+                    await SpecialCommands.GetCountMessage(botClient, update, message, cancellationToken);
                     return;
                 }
                 await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!", cancellationToken: cancellationToken);
+                return;
             }
+            await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
         }
     }
 

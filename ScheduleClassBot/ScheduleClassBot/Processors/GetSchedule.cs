@@ -23,7 +23,7 @@ internal class GetSchedule
 
         if (todayIndex >= dayArr.Length)
         {
-            _text += $"❗Выходные, показано расписание на понедельник!❗\n\n";
+            _text += $"❗ВЫХОДНЫЕ, показано расписание на понедельник!❗\n\n";
             return dayArr[0];
         }
         else

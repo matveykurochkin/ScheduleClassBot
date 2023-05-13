@@ -49,6 +49,11 @@ internal class ProcessingMessage
 
             if (message?.Text is not null)
             {
+                if (SpecialCommands.countMessage % 150 == 0)
+                {
+                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay", cancellationToken: cancellationToken);
+                    _logger.Info($"!!!PRESENT!!! Best Stickers BusyaEveryDay!");
+                }
                 if (message?.Text == "/start" || message?.Text == "Назад ⬅")
                 {
                     await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\n" +

@@ -45,7 +45,8 @@ internal class SpecialCommands
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, количество написанных сообщений боту: {countMessage}!", cancellationToken: cancellationToken);
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, количество написанных сообщений боту: {countMessage}!" +
+                $"\nКоличество отправленных подарков: {countMessage / 150}!", cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! View count message success!");
         }
         catch (Exception ex)

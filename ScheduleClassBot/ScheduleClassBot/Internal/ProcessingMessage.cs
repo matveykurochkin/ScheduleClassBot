@@ -8,12 +8,12 @@ internal class ProcessingMessage
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
-    public static void UserList(string name, string surname, long? id)
+    public static void UserList(string name, string surname, string username, long? id)
     {
         try
         {
             string path = Path.Combine(projectPath, "ListUsers.txt");
-            string fileContent, userInfo = $"User Info: {name} {surname} ID: {id}\n";
+            string fileContent, userInfo = $"User Info: {name} {surname} (@{username}) ID: {id}\n";
 
             if (!System.IO.File.Exists(path))
             {
@@ -42,9 +42,9 @@ internal class ProcessingMessage
         {
             var message = update.Message;
 
-            _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал боту данное сообщение: {message?.Text}\n id Пользователя: {message?.From?.Id}");
+            _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал боту данное сообщение: {message?.Text}\n id Пользователя: {message?.From?.Id} Username: @{message?.From?.Username}");
 
-            UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Id);
+            UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
             SpecialCommands.countMessage++;
 
             if (message?.Text is not null)

@@ -33,3 +33,28 @@ todaypri - расписание на сегодня ПРИ-121
 
 Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас!
 ```
+# Команды для обновления бота на сервере
+## Остановка службы бота на сервере
+```bash
+systemctl stop schedule-bot.service
+```
+## Прверяем корректность остановки службы
+```bash
+systemctl status schedule-bot.service
+```
+## Копирование файлов на сервер
+```bash
+pscp f:\publish.zip USERNAME:/tmp
+```
+## Делаем исполняемый файл
+```bash
+chmod +x ScheduleClassBot
+```
+## Запускаем службу
+```bash
+systemctl start schedule-bot
+```
+## Проверяем корректность запуска службы
+```bash
+systemctl status schedule-bot
+```

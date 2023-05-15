@@ -14,7 +14,9 @@ sc.exe delete ".NET Shedule Bot"
 start - обновление бота 
 listgroup - список групп
 todaypmi - расписание на сегодня ПМИ-120
+tomorrowpmi - расписание на завтра ПМИ-120
 todaypri - расписание на сегодня ПРИ-121
+tomorrowpri - расписание на завтра ПРИ-121
 ```
 
 ## Описание

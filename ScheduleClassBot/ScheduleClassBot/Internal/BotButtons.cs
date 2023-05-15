@@ -42,15 +42,22 @@ internal class BotButtons
     {
         new KeyboardButton($"Понедельник {nameGroup}"),
         new KeyboardButton($"Вторник {nameGroup}")
-    },new[]
+    },
+    new[]
     {
         new KeyboardButton($"Среда {nameGroup}"),
         new KeyboardButton($"Четверг {nameGroup}")
-    },new[]
+    },
+    new[]
     {
-        new KeyboardButton($"Пятница {nameGroup}"),
-        new KeyboardButton($"Расписание на сегодня {nameGroup}")
-    },new[]
+        new KeyboardButton($"Пятница {nameGroup}")
+    },
+    new[]
+    {
+        new KeyboardButton($"Расписание на сегодня {nameGroup}"),
+        new KeyboardButton($"Расписание на завтра {nameGroup}")
+    },
+    new[]
     {
         new KeyboardButton($"Список групп 📋")
     }

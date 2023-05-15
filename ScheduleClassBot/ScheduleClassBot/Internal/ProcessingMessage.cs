@@ -63,7 +63,9 @@ internal class ProcessingMessage
                         $"/start - команда для обновления бота\n" +
                         $"/listgroup - команда для просмотра списка групп\n" +
                         $"/todaypmi - команда для просмотра расписания на сегодня группы ПМИ-120\n" +
-                        $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                        $"/tomorrowpmi - команда для просмотра расписания на завтра группы ПМИ-120\n" +
+                        $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121\n" +
+                        $"/tomorrowpri - команда для просмотра расписания на завтра группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
                 if (message?.Text == "Узнать расписание 📜" || message?.Text == "Список групп 📋" || message?.Text == "/listgroup")
@@ -76,12 +78,20 @@ internal class ProcessingMessage
                     await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПМИ-120" || message?.Text == "/todaypmi")
+                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text) 
+                    || message?.Text == "Расписание на сегодня ПМИ-120" 
+                    || message?.Text == "/todaypmi"
+                    || message?.Text == "Расписание на завтра ПМИ-120" 
+                    || message?.Text == "/tomorrowpmi")
                 {
                     await GetSchedule.GetScheduleForGroupPMI(botClient, message, message!.Text);
                     return;
                 }
-                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text) || message?.Text == "Расписание на сегодня ПРИ-121" || message?.Text == "/todaypri")
+                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text) 
+                    || message?.Text == "Расписание на сегодня ПРИ-121" 
+                    || message?.Text == "/todaypri" 
+                    || message?.Text == "Расписание на завтра ПРИ-121"
+                    || message?.Text == "/tomorrowpri")
                 {
                     await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
                     return;

@@ -28,6 +28,23 @@ internal class GetSchedule
             return dayArr[todayIndex];
     }
 
+    public static string GetTomorrowSchedule(string[] dayArr, DayOfWeek today)
+    {
+        int todayIndex = Array.IndexOf(dayOfWeek, today.ToString());
+
+        if (todayIndex == 4 || todayIndex == 5)
+        {
+            _text += $"❗ЗАВТРА ВЫХОДНОЙ, показано расписание на понедельник!❗\n\n";
+            return dayArr[0];
+        }
+        else if (todayIndex == 6)
+        {
+            return dayArr[0];
+        }
+        else
+            return dayArr[todayIndex + 1];
+    }
+
     internal static async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update, string nameGroup)
     {
         try
@@ -51,6 +68,9 @@ internal class GetSchedule
 
             if (textMessage == "Расписание на сегодня ПМИ-120" || textMessage == "/todaypmi")
                 textMessage = GetTodaySchedule(dayOfWeekPMI, today);
+
+            if (textMessage == "Расписание на завтра ПМИ-120" || textMessage == "/tomorrowpmi")
+                textMessage = GetTomorrowSchedule(dayOfWeekPMI, today);
 
             if (dayOfWeekPMI.Contains(textMessage))
             {
@@ -121,6 +141,9 @@ internal class GetSchedule
 
             if (textMessage == "Расписание на сегодня ПРИ-121" || textMessage == "/todaypri")
                 textMessage = GetTodaySchedule(dayOfWeekPRI, today);
+
+            if (textMessage == "Расписание на завтра ПРИ-121" || textMessage == "/tomorrowpri")
+                textMessage = GetTomorrowSchedule(dayOfWeekPRI, today);
 
             if (dayOfWeekPRI.Contains(textMessage))
             {

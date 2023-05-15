@@ -72,7 +72,7 @@ internal class SpecialCommands
 
                 if (System.IO.File.Exists(path))
                 {
-                    using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                    using (FileStream fileStream = new FileStream(path, FileMode.Open))
                     {
                         InputFileStream inputFile = new InputFileStream(fileStream, logdate);
                         await botClient.SendDocumentAsync(message.Chat, inputFile, caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!");

@@ -96,6 +96,11 @@ internal class ProcessingMessage
                     await SpecialCommands.GetCountMessage(botClient, update, message, cancellationToken);
                     return;
                 }
+                if (message!.Text.Contains("specialcommandforgetlogfile"))
+                {
+                    await SpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
+                    return;
+                }
                 await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!", cancellationToken: cancellationToken);
                 return;
             }

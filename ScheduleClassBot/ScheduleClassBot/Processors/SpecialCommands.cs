@@ -9,8 +9,12 @@ internal class SpecialCommands
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
-    internal static long countMessage = 0;
-    private static string pathOnProject = "", path = "", logdate = "";
+    private static DateTime dateTime;
+    internal static ulong countMessage { get; set; }
+    internal static string? pathOnProject { get; set; }
+    internal static string? path { get; set; }
+    internal static string? logdate { get; set; }
+
     public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
@@ -61,6 +65,10 @@ internal class SpecialCommands
     {
         try
         {
+            dateTime = DateTime.Now;
+            string month = dateTime.Month < 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
+            string day = dateTime.Day < 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
+
             if (!(message.Text! == "specialcommandforgetlogfile"))
             {
                 int index = message.Text!.IndexOf(":");
@@ -79,10 +87,16 @@ internal class SpecialCommands
                     }
                 }
                 else
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!", cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!" +
+                    $"\nПример команды на сегодня:\n" +
+                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```", cancellationToken: cancellationToken);
             }
             else
-                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:\n```\nspecialcommandforgetlogfile:yyyy-mm-dd.log\n```", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +
+                    $"\n```\nspecialcommandforgetlogfile:yyyy-mm-dd.log\n```" +
+                    $"\nПример команды на сегодня:\n" +
+                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            _logger.Info($"!!!SPECIAL COMMAND!!! Get log file success!");
         }
         catch (Exception ex)
         {

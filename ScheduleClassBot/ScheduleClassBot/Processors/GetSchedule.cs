@@ -11,8 +11,8 @@ internal class GetSchedule
     private static int _weekNumber, _numeratorAndDenominator;
     private static DayOfWeek today;
 
-    internal static string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
-    internal static string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
+    internal static readonly string[] dayOfWeekPMI = { "Понедельник ПМИ-120", "Вторник ПМИ-120", "Среда ПМИ-120", "Четверг ПМИ-120", "Пятница ПМИ-120" };
+    internal static readonly string[] dayOfWeekPRI = { "Понедельник ПРИ-121", "Вторник ПРИ-121", "Среда ПРИ-121", "Четверг ПРИ-121", "Пятница ПРИ-121" };
     private static string[] dayOfWeek = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
     public static string GetTodaySchedule(string[] dayArr, DayOfWeek today)

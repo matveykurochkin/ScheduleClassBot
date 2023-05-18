@@ -66,8 +66,8 @@ internal class SpecialCommands
         try
         {
             dateTime = DateTime.Now;
-            string month = dateTime.Month < 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
-            string day = dateTime.Day < 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
+            string month = dateTime.Month <= 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
+            string day = dateTime.Day <= 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
 
             if (!(message.Text! == "specialcommandforgetlogfile"))
             {

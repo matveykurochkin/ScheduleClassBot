@@ -50,7 +50,8 @@ internal class BotButtons
     },
     new[]
     {
-        new KeyboardButton($"Пятница {nameGroup}")
+        new KeyboardButton($"Пятница {nameGroup}"),
+        new KeyboardButton($"Расписание сессии {nameGroup}")
     },
     new[]
     {

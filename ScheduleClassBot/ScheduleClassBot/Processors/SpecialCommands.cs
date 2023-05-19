@@ -87,9 +87,9 @@ internal class SpecialCommands
                     }
                 }
                 else
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!" +
+                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!\n" +
                     $"\nПример команды на сегодня:\n" +
-                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```", cancellationToken: cancellationToken);
+                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             }
             else
                 await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +

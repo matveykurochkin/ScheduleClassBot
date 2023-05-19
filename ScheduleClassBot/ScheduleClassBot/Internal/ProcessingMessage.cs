@@ -54,7 +54,8 @@ internal class ProcessingMessage
                     await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay", cancellationToken: cancellationToken);
                     _logger.Info($"!!!PRESENT!!! Best Stickers BusyaEveryDay!");
                 }
-                if (message?.Text == "/start" || message?.Text == "Назад ⬅")
+                if (message?.Text == "/start" 
+                    || message?.Text == "Назад ⬅")
                 {
                     await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\n" +
                         $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
@@ -64,16 +65,21 @@ internal class ProcessingMessage
                         $"/listgroup - команда для просмотра списка групп\n" +
                         $"/todaypmi - команда для просмотра расписания на сегодня группы ПМИ-120\n" +
                         $"/tomorrowpmi - команда для просмотра расписания на завтра группы ПМИ-120\n" +
+                        $"/sessionpmi - команда для просмотра расписания сессии группы ПМИ-120\n" +
                         $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121\n" +
-                        $"/tomorrowpri - команда для просмотра расписания на завтра группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                        $"/tomorrowpri - команда для просмотра расписания на завтра группы ПРИ-121\n" +
+                        $"/sessionpri - команда для просмотра расписания сессии группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
-                if (message?.Text == "Узнать расписание 📜" || message?.Text == "Список групп 📋" || message?.Text == "/listgroup")
+                if (message?.Text == "Узнать расписание 📜" 
+                    || message?.Text == "Список групп 📋" 
+                    || message?.Text == "/listgroup")
                 {
                     await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список групп!", replyMarkup: BotButtons.ListGroup(), cancellationToken: cancellationToken);
                     return;
                 }
-                if (message?.Text == "ПМИ-120" || message?.Text == "ПРИ-121")
+                if (message?.Text == "ПМИ-120" 
+                    || message?.Text == "ПРИ-121")
                 {
                     await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
                     return;
@@ -94,6 +100,18 @@ internal class ProcessingMessage
                     || message?.Text == "/tomorrowpri")
                 {
                     await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
+                    return;
+                }
+                if (message?.Text == "Расписание сессии ПМИ-120"
+                    || message?.Text == "/sessionpmi")
+                {
+                    await GetSessionSchedule.GetSessionOnPMI(botClient, update, message, cancellationToken);
+                    return;
+                }
+                if (message?.Text == "Расписание сессии ПРИ-121"
+                    || message?.Text == "/sessionpri")
+                {
+                    await GetSessionSchedule.GetSessionOnPRI(botClient, update, message, cancellationToken);
                     return;
                 }
                 if (message?.Text == "specialcommandforviewlistusers")

@@ -22,6 +22,7 @@ class Program
                 .Build();
 
             await host.RunAsync();
+            _logger.Info("Running app success");
         }
         catch (Exception ex)
         {

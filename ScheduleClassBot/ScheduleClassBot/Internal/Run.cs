@@ -37,6 +37,7 @@ internal class Run : IHostedService
                 receiverOptions,
                 cancellationToken
             );
+            _logger.Info($"Start Async method for starting bot");
         }
         catch (Exception ex)
         {

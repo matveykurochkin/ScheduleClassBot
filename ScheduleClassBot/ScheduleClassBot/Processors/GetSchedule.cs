@@ -123,6 +123,7 @@ internal class GetSchedule
                         break;
                 }
             }
+            _logger.Info($"Сообщение \"{message?.Text}\" успешно обработано!");
         }
         catch (Exception ex)
         {
@@ -204,6 +205,7 @@ internal class GetSchedule
                         break;
                 }
             }
+            _logger.Info($"Сообщение \"{message?.Text}\" успешно обработано!");
         }
         catch (Exception ex)
         {

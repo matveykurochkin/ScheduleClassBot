@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ScheduleClassBot;
+namespace ScheduleClassBot.Internal;
 
 internal class BotButtons
 {

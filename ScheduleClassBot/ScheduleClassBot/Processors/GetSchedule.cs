@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Globalization;
+using ScheduleClassBot.Internal;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 

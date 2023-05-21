@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using ScheduleClassBot.Internal;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 
-namespace ScheduleClassBot;
+namespace ScheduleClassBot.Internal;
 internal class Run : IHostedService
 {
     private readonly IConfiguration _cfg;
@@ -15,6 +14,7 @@ internal class Run : IHostedService
         _cfg = cfg;
     }
 
+    // ReSharper disable once InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public Task StartAsync(CancellationToken cancellationToken)

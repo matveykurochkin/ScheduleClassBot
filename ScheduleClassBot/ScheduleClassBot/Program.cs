@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using ScheduleClassBot;
+using ScheduleClassBot.Internal;
 
-namespace TelegramBotExperiments;
+namespace ScheduleClassBot;
 
 class Program
 {

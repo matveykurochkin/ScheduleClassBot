@@ -96,7 +96,7 @@ internal class SpecialCommands
                     $"\n```\nspecialcommandforgetlogfile:yyyy-mm-dd.log\n```" +
                     $"\nПример команды на сегодня:\n" +
                     $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```\n" +
-                    $"Нажать, чтобы скопировать:)", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                    $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get log file success!");
         }
         catch (Exception ex)

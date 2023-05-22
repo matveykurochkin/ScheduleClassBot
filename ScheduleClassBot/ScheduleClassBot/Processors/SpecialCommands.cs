@@ -1,4 +1,5 @@
 ﻿using NLog;
+using ScheduleClassBot.Internal;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -102,6 +103,41 @@ internal class SpecialCommands
         catch (Exception ex)
         {
             _logger.Error("!!!SPECIAL COMMAND!!! Error get log file. {method}: {error}", nameof(GetLogFile), ex);
+        }
+    }
+
+    public static async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandButton(), cancellationToken: cancellationToken);
+            _logger.Info($"!!!SPECIAL COMMAND!!! Get button with all special commands success!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("!!!SPECIAL COMMAND!!! Error button with all special commands. {method}: {error}", nameof(GetButtonWithSpecialCommands), ex);
+        }
+    }
+
+    public static async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи информацию о аккаунте!\n\n" +
+                $"Идентификатор пользователя: {message?.From?.Id}\n" +
+                $"Имя пользователя: @{message?.From?.Username}\n" +
+                $"Имя: {message?.From?.FirstName}\n" +
+                $"Фамилия: {message?.From?.LastName}\n" +
+                $"Язык: {message?.From?.LanguageCode}\n" +
+                $"Информация о местоположении: {message?.Location}\n" +
+                $"Контактные данные: {message?.Contact}\n" +
+                $"Наличие Telegram премиум: {message?.From?.IsPremium}\n" +
+                $"Бот: {message?.From?.IsBot}", replyMarkup: SpecialBotButton.SpecialCommandButton(), cancellationToken: cancellationToken);
+            _logger.Info($"!!!SPECIAL COMMAND!!! Get your info profile success!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("!!!SPECIAL COMMAND!!! Error your info profile. {method}: {error}", nameof(GetInfoYourProfile), ex);
         }
     }
 }

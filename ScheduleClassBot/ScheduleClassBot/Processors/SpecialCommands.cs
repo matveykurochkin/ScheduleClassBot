@@ -43,7 +43,7 @@ internal class SpecialCommands
         }
         catch (Exception ex)
         {
-            _logger.Error($"!!!SPECIAL COMMAND!!! Error view users list. Error message: {ex.Message}");
+            _logger.Error("!!!SPECIAL COMMAND!!! Error view users list. {method}: {error}", nameof(GetUsersList), ex);
         }
     }
 
@@ -57,7 +57,7 @@ internal class SpecialCommands
         }
         catch (Exception ex)
         {
-            _logger.Error($"!!!SPECIAL COMMAND!!! Error view count message. Error message: {ex.Message}");
+            _logger.Error("!!!SPECIAL COMMAND!!! Error view count message. {method}: {error}", nameof(GetCountMessage), ex);
         }
     }
 
@@ -101,7 +101,7 @@ internal class SpecialCommands
         }
         catch (Exception ex)
         {
-            _logger.Error($"!!!SPECIAL COMMAND!!! Error get log file. Error message: {ex.Message}");
+            _logger.Error("!!!SPECIAL COMMAND!!! Error get log file. {method}: {error}", nameof(GetLogFile), ex);
         }
     }
 }

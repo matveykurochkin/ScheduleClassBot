@@ -54,7 +54,7 @@ internal class GetSchedule
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error view button for all group. Error message: {ex.Message}");
+            _logger.Error("Error view button for all group. {method}: {error}", nameof(GetButtonForGroup), ex);
         }
     }
 
@@ -124,11 +124,10 @@ internal class GetSchedule
                         break;
                 }
             }
-            _logger.Info($"Сообщение \"{message?.Text}\" успешно обработано!");
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error view schedule for group PMI. Error message: {ex.Message}");
+            _logger.Error("Error view schedule for group PMI. {method}: {error}", nameof(GetScheduleForGroupPMI), ex);
         }
     }
 
@@ -206,11 +205,10 @@ internal class GetSchedule
                         break;
                 }
             }
-            _logger.Info($"Сообщение \"{message?.Text}\" успешно обработано!");
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error view schedule for group PRI. Error message: {ex.Message}");
+            _logger.Error("Error view schedule for group PRI. {method}: {error}", nameof(GetScheduleForGroupPRI), ex);
         }
     }
 }

@@ -14,7 +14,6 @@ internal class Run : IHostedService
         _cfg = cfg;
     }
 
-    // ReSharper disable once InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -37,7 +36,6 @@ internal class Run : IHostedService
                 receiverOptions,
                 cancellationToken
             );
-            _logger.Info($"Start Async method for starting bot");
         }
         catch (Exception ex)
         {

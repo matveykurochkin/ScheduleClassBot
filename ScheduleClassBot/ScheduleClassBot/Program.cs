@@ -26,7 +26,7 @@ class Program
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error running app");
+            _logger.Error("Error running app. {method}: {error}",nameof(Main), ex);
         }
     }
 }

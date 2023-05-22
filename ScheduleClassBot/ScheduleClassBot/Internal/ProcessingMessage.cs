@@ -58,7 +58,7 @@ internal class ProcessingMessage
         {
             var message = update.Message;
 
-            _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал боту данное сообщение: {message?.Text}\n id Пользователя: {message?.From?.Id} Username: @{message?.From?.Username}");
+            _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
 
             UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
             SpecialCommands.countMessage++;

@@ -62,3 +62,46 @@ systemctl start schedule-bot
 ```bash
 systemctl status schedule-bot
 ```
+# Скрипт для автоматического обновления и запуска бота на сервере
+```bash
+#!/bin/bash
+
+CurrDir=$(pwd)
+
+echo stop service
+systemctl stop schedule-bot.service
+
+echo clean
+cd /opt/src/ScheduleClassBot
+git clean -ffxd
+git reset --hard HEAD
+git pull
+
+echo build
+dotnet publish /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot.csproj -c Release -r linux-x64 --self-contained
+
+echo bakup
+mkdir -p /opt/schedule-bot/bak
+cp /opt/schedule-bot/linux-x64/ListUsers.txt /opt/schedule-bot/bak/ListUsers.txt
+cp /opt/schedule-bot/linux-x64/nlog.config /opt/schedule-bot/bak/nlog.config
+cp /opt/schedule-bot/linux-x64/appsettings.json /opt/schedule-bot/bak/appsettings.json
+
+echo copy
+rm -rf /opt/schedule-bot/linux-x64
+mkdir -p /opt/schedule-bot/linux-x64
+cp -R  /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot/bin/Release/net7.0/linux-x64/publish/* /opt/schedule-bot/linux-x64
+
+echo restore from bakup
+cp /opt/schedule-bot/bak/ListUsers.txt /opt/schedule-bot/linux-x64/ListUsers.txt
+cp /opt/schedule-bot/bak/nlog.config /opt/schedule-bot/linux-x64/nlog.config
+cp /opt/schedule-bot/bak/appsettings.json /opt/schedule-bot/linux-x64/appsettings.json
+rm -rf /opt/schedule-bot/bak
+
+echo run service
+systemctl start schedule-bot.service
+
+echo check service
+systemctl status schedule-bot.service
+
+cd $CurrDir
+```

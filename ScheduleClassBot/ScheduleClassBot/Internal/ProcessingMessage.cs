@@ -138,6 +138,12 @@ internal class ProcessingMessage
                     return;
                 }
 
+                if (message!.Text.Contains("specialcommandforviewbuttonwithlistallspecialcommands"))
+                {
+                    await SpecialCommands.GetButtonWithSpecialCommands(botClient, update, message, cancellationToken);
+                    return;
+                }
+
                 if (message?.Text == "specialcommandforviewlistusers")
                 {
                     await SpecialCommands.GetUsersList(botClient, update, message, cancellationToken);
@@ -153,6 +159,12 @@ internal class ProcessingMessage
                 if (message!.Text.Contains("specialcommandforgetlogfile"))
                 {
                     await SpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
+                    return;
+                }
+
+                if (message!.Text.Contains("specialcommandforcheckyourprofile"))
+                {
+                    await SpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
                     return;
                 }
 

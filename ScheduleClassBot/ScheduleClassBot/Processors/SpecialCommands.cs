@@ -132,7 +132,7 @@ internal class SpecialCommands
                 $"Информация о местоположении: {message?.Location}\n" +
                 $"Контактные данные: {message?.Contact}\n" +
                 $"Наличие Telegram премиум: {message?.From?.IsPremium}\n" +
-                $"Бот: {message?.From?.IsBot}", replyMarkup: SpecialBotButton.SpecialCommandButton(), cancellationToken: cancellationToken);
+                $"Бот: {message?.From?.IsBot}", cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get your info profile success!");
         }
         catch (Exception ex)

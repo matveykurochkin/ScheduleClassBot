@@ -2,15 +2,16 @@
 using ScheduleClassBot.Processors;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.Internal;
 
 internal class ProcessingMessage
 {
-    // ReSharper disable InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
-    // ReSharper restore InconsistentNaming
+    static int countLike { get; set; }
+    static int countDislike { get; set; }
 
     private static void UserList(string name, string surname, string username, long? id)
     {
@@ -54,11 +55,48 @@ internal class ProcessingMessage
 
     private static async Task HandleUpdateAsyncInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
+        {
+            var callbackQuery = update.CallbackQuery;
+            var chatId = callbackQuery!.Message!.Chat.Id;
+
+            if (update.CallbackQuery?.Data is not null)
+            {
+                if (update.CallbackQuery?.Data == "like")
+                {
+                    var inlineButton = new InlineKeyboardMarkup(new[]
+                    {
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({countDislike})", callbackData: "dislike")
+                    }
+                     });
+
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
+                }
+                if (update.CallbackQuery?.Data == "dislike")
+                {
+                    var inlineButtonTwo = new InlineKeyboardMarkup(new[]
+{
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({countLike})", callbackData: "like"),
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({++countDislike})", callbackData: "dislike")
+                    }
+                     });
+
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButtonTwo, cancellationToken: cancellationToken);
+                }
+
+            }
+        }
+
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
         {
             var message = update.Message;
 
-            _logger.Info($"Пользователь {message?.From?.FirstName} {message?.From?.LastName} написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
+            _logger.Info($"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
 
             UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
             SpecialCommands.countMessage++;
@@ -72,10 +110,11 @@ internal class ProcessingMessage
                 }
 
                 if (message?.Text == "/start"
-                    || message?.Text == "Назад ⬅")
+                    || message?.Text == "Назад ⬅"
+                    || message?.Text == "/listgroup")
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\n" +
-                                                                       $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
+                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!" , replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat, $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
                                                                        $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                                                                        $"Доступные команды:\n" +
                                                                        $"/start - команда для обновления бота\n" +
@@ -85,15 +124,7 @@ internal class ProcessingMessage
                                                                        $"/sessionpmi - команда для просмотра расписания сессии группы ПМИ-120\n" +
                                                                        $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121\n" +
                                                                        $"/tomorrowpri - команда для просмотра расписания на завтра группы ПРИ-121\n" +
-                                                                       $"/sessionpri - команда для просмотра расписания сессии группы ПРИ-121", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
-                    return;
-                }
-
-                if (message?.Text == "Узнать расписание 📜"
-                    || message?.Text == "Список групп 📋"
-                    || message?.Text == "/listgroup")
-                {
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список групп!", replyMarkup: BotButtons.ListGroup(), cancellationToken: cancellationToken);
+                                                                       $"/sessionpri - команда для просмотра расписания сессии группы ПРИ-121", replyMarkup: BotButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -168,7 +199,7 @@ internal class ProcessingMessage
                     return;
                 }
 
-                await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!", cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", cancellationToken: cancellationToken);
                 return;
             }
 

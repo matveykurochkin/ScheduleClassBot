@@ -10,24 +10,8 @@ internal class BotButtons
         {
     new[]
     {
-        new KeyboardButton("Узнать расписание 📜")
-    }
-     });
-        tgButton.ResizeKeyboard = true;
-        return tgButton;
-    }
-    public static IReplyMarkup ListGroup()
-    {
-        var tgButton = new ReplyKeyboardMarkup(new[]
-        {
-    new[]
-    {
-        new KeyboardButton("ПМИ-120"),
-        new KeyboardButton("ПРИ-121")
-    },
-    new[]
-    {
-        new KeyboardButton("Назад ⬅")
+         new KeyboardButton("ПМИ-120"),
+         new KeyboardButton("ПРИ-121")
     }
      });
         tgButton.ResizeKeyboard = true;
@@ -60,10 +44,23 @@ internal class BotButtons
     },
     new[]
     {
-        new KeyboardButton($"Список групп 📋")
+        new KeyboardButton($"Назад ⬅")
     }
      });
         tgButton.ResizeKeyboard = true;
         return tgButton;
+    }
+
+    public static InlineKeyboardMarkup InlineButtonOnBot()
+    {
+        var inlineButton = new InlineKeyboardMarkup(new[]
+        {
+        new []
+        {
+            InlineKeyboardButton.WithCallbackData(text: "👍🏻", callbackData: "like"),
+            InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
+        }
+        });
+        return inlineButton;
     }
 }

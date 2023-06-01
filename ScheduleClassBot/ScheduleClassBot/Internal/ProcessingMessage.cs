@@ -10,8 +10,8 @@ internal class ProcessingMessage
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
-    static int countLike { get; set; }
-    static int countDislike { get; set; }
+    static ulong countLike { get; set; }
+    static ulong countDislike { get; set; }
 
     private static void UserList(string name, string surname, string username, long? id)
     {
@@ -55,43 +55,6 @@ internal class ProcessingMessage
 
     private static async Task HandleUpdateAsyncInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
-        {
-            var callbackQuery = update.CallbackQuery;
-            var chatId = callbackQuery!.Message!.Chat.Id;
-
-            if (update.CallbackQuery?.Data is not null)
-            {
-                if (update.CallbackQuery?.Data == "like")
-                {
-                    var inlineButton = new InlineKeyboardMarkup(new[]
-                    {
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({countDislike})", callbackData: "dislike")
-                    }
-                     });
-
-                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
-                }
-                if (update.CallbackQuery?.Data == "dislike")
-                {
-                    var inlineButtonTwo = new InlineKeyboardMarkup(new[]
-{
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({++countDislike})", callbackData: "dislike")
-                    }
-                     });
-
-                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButtonTwo, cancellationToken: cancellationToken);
-                }
-
-            }
-        }
-
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
         {
             var message = update.Message;
@@ -110,21 +73,19 @@ internal class ProcessingMessage
                 }
 
                 if (message?.Text == "/start"
-                    || message?.Text == "Назад ⬅"
-                    || message?.Text == "/listgroup")
+                    || message?.Text == "Назад ⬅")
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!" , replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                     await botClient.SendTextMessageAsync(message.Chat, $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
                                                                        $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                                                                        $"Доступные команды:\n" +
-                                                                       $"/start - команда для обновления бота\n" +
-                                                                       $"/listgroup - команда для просмотра списка групп\n" +
-                                                                       $"/todaypmi - команда для просмотра расписания на сегодня группы ПМИ-120\n" +
-                                                                       $"/tomorrowpmi - команда для просмотра расписания на завтра группы ПМИ-120\n" +
-                                                                       $"/sessionpmi - команда для просмотра расписания сессии группы ПМИ-120\n" +
-                                                                       $"/todaypri - команда для просмотра расписания на сегодня группы ПРИ-121\n" +
-                                                                       $"/tomorrowpri - команда для просмотра расписания на завтра группы ПРИ-121\n" +
-                                                                       $"/sessionpri - команда для просмотра расписания сессии группы ПРИ-121", replyMarkup: BotButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
+                                                                       $"/start - обновление бота\n" +
+                                                                       $"/todaypmi - расписание на сегодня группы ПМИ-120\n" +
+                                                                       $"/tomorrowpmi - расписание на завтра группы ПМИ-120\n" +
+                                                                       $"/sessionpmi - расписание сессии группы ПМИ-120\n" +
+                                                                       $"/todaypri - расписание на сегодня группы ПРИ-121\n" +
+                                                                       $"/tomorrowpri - расписание на завтра группы ПРИ-121\n" +
+                                                                       $"/sessionpri - расписание сессии группы ПРИ-121", replyMarkup: InlineButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -175,18 +136,6 @@ internal class ProcessingMessage
                     return;
                 }
 
-                if (message?.Text == "specialcommandforviewlistusers")
-                {
-                    await SpecialCommands.GetUsersList(botClient, update, message, cancellationToken);
-                    return;
-                }
-
-                if (message?.Text == "specialcommandforviewcountmessages")
-                {
-                    await SpecialCommands.GetCountMessage(botClient, update, message, cancellationToken);
-                    return;
-                }
-
                 if (message!.Text.Contains("specialcommandforgetlogfile"))
                 {
                     await SpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
@@ -204,6 +153,76 @@ internal class ProcessingMessage
             }
 
             await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
+        }
+
+        if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
+        {
+            var callbackQuery = update.CallbackQuery;
+            var chatId = callbackQuery!.Message!.Chat.Id;
+
+            if (update.CallbackQuery?.Data is not null)
+            {
+
+                if (update.CallbackQuery?.Data == "like")
+                {
+                    var inlineButton = new InlineKeyboardMarkup(new[]
+                    {
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({countDislike})", callbackData: "dislike")
+                    }
+                     });
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "dislike")
+                {
+                    var inlineButtonTwo = new InlineKeyboardMarkup(new[]
+{
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({countLike})", callbackData: "like"),
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({++countDislike})", callbackData: "dislike")
+                    }
+                     });
+
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButtonTwo, cancellationToken: cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "specialcommandforviewlistusers")
+                {
+                    await SpecialCommands.GetUsersList(botClient, update, update.Message!, cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "specialcommandforviewcountmessages")
+                {
+                    await SpecialCommands.GetCountMessage(botClient, update, update.Message!, cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "specialcommandforgetlogfile")
+                {
+                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforgetlogfile", cancellationToken: cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "specialcommandforcheckyourprofile")
+                {
+                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforcheckyourprofile", cancellationToken: cancellationToken);
+                    return;
+                }
+
+                if (update.CallbackQuery?.Data == "back")
+                {
+                    await SpecialCommands.Back(botClient, update, cancellationToken);
+                    return;
+                }
+                _logger.Info($"Press Inline button! CallbackQuery: {update.CallbackQuery?.Data}");
+            }
         }
     }
 

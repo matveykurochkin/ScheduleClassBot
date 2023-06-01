@@ -50,17 +50,4 @@ internal class BotButtons
         tgButton.ResizeKeyboard = true;
         return tgButton;
     }
-
-    public static InlineKeyboardMarkup InlineButtonOnBot()
-    {
-        var inlineButton = new InlineKeyboardMarkup(new[]
-        {
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "👍🏻", callbackData: "like"),
-            InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
-        }
-        });
-        return inlineButton;
-    }
 }

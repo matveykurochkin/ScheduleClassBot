@@ -16,10 +16,29 @@ internal class SpecialCommands
     internal static string? path { get; set; }
     internal static string? logdate { get; set; }
 
+    public static async Task Back(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        var callbackQuery = update.CallbackQuery;
+        var chatId = callbackQuery!.Message!.Chat.Id;
+        try
+        {
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
+
+            _logger.Info($"!!!SPECIAL COMMAND!!! Back success!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("!!!SPECIAL COMMAND!!! Error back. {method}: {error}", nameof(GetCountMessage), ex);
+        }
+    }
+
+
     public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
         {
+            var callbackQuery = update.CallbackQuery;
+            var chatId = callbackQuery!.Message!.Chat.Id;
             string fileContent = "", path = Path.Combine(projectPath, "ListUsers.txt");
 
             if (System.IO.File.Exists(path))
@@ -33,12 +52,12 @@ internal class SpecialCommands
                         responseBuilder.AppendLine($"User Info: {line.Trim()}");
                 }
 
-                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список пользователей:\n{fileContent}", cancellationToken: cancellationToken);
+                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Держи список пользователей:\n{fileContent}", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 _logger.Info($"!!!SPECIAL COMMAND!!! View users list success!");
             }
             else
             {
-                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, пользователей нет!", cancellationToken: cancellationToken);
+                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Пользователей нет!", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 _logger.Info($"!!!SPECIAL COMMAND!!! Error view users list success!");
             }
         }
@@ -50,10 +69,13 @@ internal class SpecialCommands
 
     public static async Task GetCountMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
+        var callbackQuery = update.CallbackQuery;
+        var chatId = callbackQuery!.Message!.Chat.Id;
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, количество написанных сообщений боту: {countMessage}!" +
-                $"\nКоличество отправленных подарков: {countMessage / 150}!", cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Количество написанных сообщений боту: {countMessage}!" +
+                                $"\nКоличество отправленных подарков: {countMessage / 150}!", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+
             _logger.Info($"!!!SPECIAL COMMAND!!! View count message success!");
         }
         catch (Exception ex)
@@ -110,7 +132,7 @@ internal class SpecialCommands
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandButton(), cancellationToken: cancellationToken);
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get button with all special commands success!");
         }
         catch (Exception ex)

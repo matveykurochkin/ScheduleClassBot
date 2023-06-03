@@ -179,6 +179,7 @@ internal class SpecialCommands
 
     public static async Task GetQuestionsFromChatGPT(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
+        int firstMessageId = message.MessageId;
         try
         {
             if (!(message.Text! == "Q") && idUser!.Any(x => x == message?.From?.Id))
@@ -186,11 +187,13 @@ internal class SpecialCommands
                 int index = message!.Text!.IndexOf(":");
                 if (index != -1)
                     gptMessage = message.Text!.Substring(index + 1).Trim();
-                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                var firstMessage = await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                firstMessageId = firstMessage.MessageId;
             }
             else
             {
-                await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                var firstMessage = await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                firstMessageId = firstMessage.MessageId;
                 return;
             }
 
@@ -221,12 +224,12 @@ internal class SpecialCommands
             messages.Add(responseMessage);
             var responseText = responseMessage.Content.Trim();
             _logger.Info($"ChatGPT: {responseText}");
-            await botClient.SendTextMessageAsync(message.Chat, $"Chat GPT: {responseText}", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(message.Chat,firstMessageId, $"Chat GPT: {responseText}", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
         }
         catch (Exception ex)
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(message.Chat, firstMessageId, $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetQuestionsFromChatGPT), ex);
             messages.Clear();
         }

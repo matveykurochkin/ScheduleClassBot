@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Microsoft.Extensions.Configuration;
+using NLog;
 using ScheduleClassBot.Internal;
 using System.Net.Http.Json;
 using System.Text;
@@ -9,16 +10,21 @@ using Telegram.Bot.Types.Enums;
 namespace ScheduleClassBot.Processors;
 internal class SpecialCommands
 {
+    private static IConfiguration configuration = new ConfigurationBuilder()
+       .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+       .AddJsonFile("appsettings.json")
+       .Build();
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static DateTime dateTime;
 
-    static string apiKey = "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";
-    static string endpoint = "https://api.openai.com/v1/chat/completions";
-    static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
-    static string? gptMessage { get; set; }
+    private static string apiKey = "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";
+    private static string endpoint = "https://api.openai.com/v1/chat/completions";
+    private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
+    private static string? gptMessage { get; set; }
 
-    static long[] idUser = new long[] { 1733375919, 1443692088, 593275455, 6036812442 };
+    private static long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     internal static ulong countMessage { get; set; }
     internal static string? pathOnProject { get; set; }
@@ -175,7 +181,7 @@ internal class SpecialCommands
     {
         try
         {
-            if (!(message.Text! == "Q") && idUser.Any(x => x == message?.From?.Id))
+            if (!(message.Text! == "Q") && idUser!.Any(x => x == message?.From?.Id))
             {
                 int index = message!.Text!.IndexOf(":");
                 if (index != -1)
@@ -220,6 +226,7 @@ internal class SpecialCommands
         }
         catch (Exception ex)
         {
+            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetQuestionsFromChatGPT), ex);
             messages.Clear();
         }

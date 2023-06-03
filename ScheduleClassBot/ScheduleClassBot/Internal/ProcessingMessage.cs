@@ -11,7 +11,6 @@ internal class ProcessingMessage
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
     static ulong countLike { get; set; }
-    static ulong countDislike { get; set; }
 
     private static void UserList(string name, string surname, string username, long? id)
     {
@@ -148,6 +147,12 @@ internal class ProcessingMessage
                     return;
                 }
 
+                if (message!.Text.Contains("Q"))
+                {
+                    await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
+                    return;
+                }
+
                 await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", cancellationToken: cancellationToken);
                 return;
             }
@@ -170,7 +175,7 @@ internal class ProcessingMessage
                     new []
                     {
                         InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({countDislike})", callbackData: "dislike")
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
                     }
                      });
                     await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
@@ -179,16 +184,16 @@ internal class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "dislike")
                 {
-                    var inlineButtonTwo = new InlineKeyboardMarkup(new[]
+                    var inlineButton = new InlineKeyboardMarkup(new[]
 {
                     new []
                     {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻 ({++countDislike})", callbackData: "dislike")
+                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
+                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
                     }
                      });
-
-                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButtonTwo, cancellationToken: cancellationToken);
+                    await botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "Я знал, что ты можешь ошибиться при нажатии на кнопку лайка, поэтому я сразу же исправил эту ошибку! 😊", showAlert: true);
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
                     return;
                 }
 

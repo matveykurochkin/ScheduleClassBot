@@ -1,5 +1,6 @@
 ﻿using NLog;
 using ScheduleClassBot.Internal;
+using System.Net.Http.Json;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,6 +12,14 @@ internal class SpecialCommands
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static DateTime dateTime;
+
+    static string apiKey = "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";
+    static string endpoint = "https://api.openai.com/v1/chat/completions";
+    static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
+    static string? gptMessage { get; set; }
+
+    static long[] idUser = new long[] { 1733375919, 1443692088, 593275455, 6036812442 };
+
     internal static ulong countMessage { get; set; }
     internal static string? pathOnProject { get; set; }
     internal static string? path { get; set; }
@@ -31,7 +40,6 @@ internal class SpecialCommands
             _logger.Error("!!!SPECIAL COMMAND!!! Error back. {method}: {error}", nameof(GetCountMessage), ex);
         }
     }
-
 
     public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
@@ -160,6 +168,60 @@ internal class SpecialCommands
         catch (Exception ex)
         {
             _logger.Error("!!!SPECIAL COMMAND!!! Error your info profile. {method}: {error}", nameof(GetInfoYourProfile), ex);
+        }
+    }
+
+    public static async Task GetQuestionsFromChatGPT(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!(message.Text! == "Q") && idUser.Any(x => x == message?.From?.Id))
+            {
+                int index = message!.Text!.IndexOf(":");
+                if (index != -1)
+                    gptMessage = message.Text!.Substring(index + 1).Trim();
+                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                return;
+            }
+
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+            GPTResponse.Message mes = new GPTResponse.Message()
+            {
+                Role = "user",
+                Content = gptMessage!
+            };
+
+            messages.Add(mes);
+
+            GPTResponse.Request requestData = new GPTResponse.Request()
+            {
+                ModelId = "gpt-3.5-turbo",
+                Messages = messages
+            };
+            using var response = await httpClient.PostAsJsonAsync(endpoint, requestData);
+
+            GPTResponse.ResponseData? responseData = await response.Content.ReadFromJsonAsync<GPTResponse.ResponseData>();
+
+            var choices = responseData?.Choices ?? new List<GPTResponse.Choice>();
+            var choice = choices[0];
+
+            GPTResponse.Message responseMessage = choice.Message;
+            messages.Add(responseMessage);
+            var responseText = responseMessage.Content.Trim();
+            _logger.Info($"ChatGPT: {responseText}");
+            await botClient.SendTextMessageAsync(message.Chat, $"Chat GPT: {responseText}", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            _logger.Info($"!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetQuestionsFromChatGPT), ex);
+            messages.Clear();
         }
     }
 }

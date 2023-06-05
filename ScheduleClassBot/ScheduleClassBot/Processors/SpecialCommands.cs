@@ -19,7 +19,7 @@ internal class SpecialCommands
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static DateTime dateTime;
 
-    private static string apiKey = "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";
+    private static string? apiKey = configuration.GetSection("OpenAI:ChatGPTKey").Value;
     private static string endpoint = "https://api.openai.com/v1/chat/completions";
     private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
     private static string? gptMessage { get; set; }

@@ -19,7 +19,7 @@ internal class SpecialCommands
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static DateTime dateTime;
 
-    private static string apiKey = "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";
+    private static string apiKey = "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";
     private static string endpoint = "https://api.openai.com/v1/chat/completions";
     private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
     private static string? gptMessage { get; set; }
@@ -214,7 +214,6 @@ internal class SpecialCommands
                 Messages = messages
             };
             using var response = await httpClient.PostAsJsonAsync(endpoint, requestData);
-
             GPTResponse.ResponseData? responseData = await response.Content.ReadFromJsonAsync<GPTResponse.ResponseData>();
 
             var choices = responseData?.Choices ?? new List<GPTResponse.Choice>();

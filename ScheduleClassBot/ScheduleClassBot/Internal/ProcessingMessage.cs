@@ -9,8 +9,8 @@ namespace ScheduleClassBot.Internal;
 internal class ProcessingMessage
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private static string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
-    static ulong countLike { get; set; }
+    private static readonly string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
+    private static ulong countLike { get; set; }
 
     private static void UserList(string name, string surname, string username, long? id)
     {
@@ -129,25 +129,25 @@ internal class ProcessingMessage
                     return;
                 }
 
-                if (message!.Text.Contains("specialcommandforviewbuttonwithlistallspecialcommands"))
+                if (message!.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands"))
                 {
                     await SpecialCommands.GetButtonWithSpecialCommands(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.Contains("specialcommandforgetlogfile"))
+                if (message!.Text.StartsWith("specialcommandforgetlogfile"))
                 {
                     await SpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.Contains("specialcommandforcheckyourprofile"))
+                if (message!.Text.StartsWith("specialcommandforcheckyourprofile"))
                 {
                     await SpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.Contains("Q"))
+                if (message!.Text.StartsWith("Q"))
                 {
                     await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
                     return;

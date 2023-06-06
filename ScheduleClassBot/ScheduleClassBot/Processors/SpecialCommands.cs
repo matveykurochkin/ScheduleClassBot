@@ -19,17 +19,17 @@ internal class SpecialCommands
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static DateTime dateTime;
 
-    private static string? apiKey = configuration.GetSection("OpenAI:ChatGPTKey").Value;
+    private static readonly string? apiKey = configuration.GetSection("OpenAI:ChatGPTKey").Value;
     private static string endpoint = "https://api.openai.com/v1/chat/completions";
     private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
     private static string? gptMessage { get; set; }
 
-    private static long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
+    private static readonly long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     internal static ulong countMessage { get; set; }
-    internal static string? pathOnProject { get; set; }
-    internal static string? path { get; set; }
-    internal static string? logdate { get; set; }
+    private static string? pathOnProject { get; set; }
+    private static string? path { get; set; }
+    private static string? logdate { get; set; }
 
     public static async Task Back(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
@@ -182,7 +182,7 @@ internal class SpecialCommands
         int firstMessageId = message.MessageId;
         try
         {
-            if (!(message.Text! == "Q") && idUser!.Any(x => x == message?.From?.Id))
+            if (message.Text! != "Q" && idUser!.Any(x => x == message?.From?.Id))
             {
                 int index = message!.Text!.IndexOf(":");
                 if (index != -1)

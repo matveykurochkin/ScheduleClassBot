@@ -147,7 +147,8 @@ internal class ProcessingMessage
                     return;
                 }
 
-                if (message!.Text.StartsWith("Q"))
+                if (message!.Text.StartsWith("Q")
+                || message!.Text.StartsWith("В"))
                 {
                     await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
                     return;

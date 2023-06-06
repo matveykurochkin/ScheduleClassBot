@@ -182,7 +182,7 @@ internal class SpecialCommands
         int firstMessageId = message.MessageId;
         try
         {
-            if (message.Text! != "Q" && idUser!.Any(x => x == message?.From?.Id))
+            if ((message.Text! != "Q" || message.Text! != "В") && idUser!.Any(x => x == message?.From?.Id))
             {
                 int index = message!.Text!.IndexOf(":");
                 if (index != -1)

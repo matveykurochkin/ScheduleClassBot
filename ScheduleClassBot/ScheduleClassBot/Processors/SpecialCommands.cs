@@ -8,12 +8,13 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace ScheduleClassBot.Processors;
+
 internal class SpecialCommands
 {
     private static IConfiguration configuration = new ConfigurationBuilder()
-       .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-       .AddJsonFile("appsettings.json")
-       .Build();
+        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+        .AddJsonFile("appsettings.json")
+        .Build();
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static string projectPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -23,8 +24,6 @@ internal class SpecialCommands
     private static string endpoint = "https://api.openai.com/v1/chat/completions";
     private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
     private static string? gptMessage { get; set; }
-
-    private static readonly long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     internal static ulong countMessage { get; set; }
     private static string? pathOnProject { get; set; }
@@ -37,7 +36,9 @@ internal class SpecialCommands
         var chatId = callbackQuery!.Message!.Chat.Id;
         try
         {
-            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
+                $"Держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandInlineButton(),
+                cancellationToken: cancellationToken);
 
             _logger.Info($"!!!SPECIAL COMMAND!!! Back success!");
         }
@@ -47,7 +48,8 @@ internal class SpecialCommands
         }
     }
 
-    public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -66,12 +68,15 @@ internal class SpecialCommands
                         responseBuilder.AppendLine($"User Info: {line.Trim()}");
                 }
 
-                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Держи список пользователей:\n{fileContent}", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
+                    $"Держи список пользователей:\n{fileContent}",
+                    replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 _logger.Info($"!!!SPECIAL COMMAND!!! View users list success!");
             }
             else
             {
-                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Пользователей нет!", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Пользователей нет!",
+                    replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 _logger.Info($"!!!SPECIAL COMMAND!!! Error view users list success!");
             }
         }
@@ -81,24 +86,29 @@ internal class SpecialCommands
         }
     }
 
-    public static async Task GetCountMessage(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetCountMessage(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
         var chatId = callbackQuery!.Message!.Chat.Id;
         try
         {
-            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Количество написанных сообщений боту: {countMessage}!" +
-                                $"\nКоличество отправленных подарков: {countMessage / 150}!", replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
+                $"Количество написанных сообщений боту: {countMessage}!" +
+                $"\nКоличество отправленных подарков: {countMessage / 150}!",
+                replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             _logger.Info($"!!!SPECIAL COMMAND!!! View count message success!");
         }
         catch (Exception ex)
         {
-            _logger.Error("!!!SPECIAL COMMAND!!! Error view count message. {method}: {error}", nameof(GetCountMessage), ex);
+            _logger.Error("!!!SPECIAL COMMAND!!! Error view count message. {method}: {error}", nameof(GetCountMessage),
+                ex);
         }
     }
 
-    public static async Task GetLogFile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetLogFile(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -120,20 +130,26 @@ internal class SpecialCommands
                     using (FileStream fileStream = new FileStream(path, FileMode.Open))
                     {
                         InputFileStream inputFile = new InputFileStream(fileStream, logdate);
-                        await botClient.SendDocumentAsync(message.Chat, inputFile, caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!");
+                        await botClient.SendDocumentAsync(message.Chat, inputFile,
+                            caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!");
                     }
                 }
                 else
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!\n" +
-                    $"\nПример команды на сегодня:\n" +
-                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!\n" +
+                        $"\nПример команды на сегодня:\n" +
+                        $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```",
+                        parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             }
             else
-                await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +
+                await botClient.SendTextMessageAsync(message.Chat,
+                    $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +
                     $"\n```\nspecialcommandforgetlogfile:yyyy-mm-dd.log\n```" +
                     $"\nПример команды на сегодня:\n" +
                     $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```\n" +
-                    $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                    $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown,
+                    cancellationToken: cancellationToken);
+
             _logger.Info($"!!!SPECIAL COMMAND!!! Get log file success!");
         }
         catch (Exception ex)
@@ -142,24 +158,30 @@ internal class SpecialCommands
         }
     }
 
-    public static async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи список специальных функций бота!", replyMarkup: SpecialBotButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
+            await botClient.SendTextMessageAsync(message.Chat,
+                $"{update.Message?.From?.FirstName}, держи список специальных функций бота!",
+                replyMarkup: SpecialBotButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get button with all special commands success!");
         }
         catch (Exception ex)
         {
-            _logger.Error("!!!SPECIAL COMMAND!!! Error button with all special commands. {method}: {error}", nameof(GetButtonWithSpecialCommands), ex);
+            _logger.Error("!!!SPECIAL COMMAND!!! Error button with all special commands. {method}: {error}",
+                nameof(GetButtonWithSpecialCommands), ex);
         }
     }
 
-    public static async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         try
         {
-            await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, держи информацию о аккаунте!\n\n" +
+            await botClient.SendTextMessageAsync(message.Chat,
+                $"{update.Message?.From?.FirstName}, держи информацию о аккаунте!\n\n" +
                 $"Идентификатор пользователя: {message?.From?.Id}\n" +
                 $"Имя пользователя: @{message?.From?.Username}\n" +
                 $"Имя: {message?.From?.FirstName}\n" +
@@ -173,29 +195,23 @@ internal class SpecialCommands
         }
         catch (Exception ex)
         {
-            _logger.Error("!!!SPECIAL COMMAND!!! Error your info profile. {method}: {error}", nameof(GetInfoYourProfile), ex);
+            _logger.Error("!!!SPECIAL COMMAND!!! Error your info profile. {method}: {error}",
+                nameof(GetInfoYourProfile), ex);
         }
     }
 
-    public static async Task GetQuestionsFromChatGPT(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    public static async Task GetQuestionsFromChatGPT(ITelegramBotClient botClient, Update update, Message message,
+        CancellationToken cancellationToken)
     {
         int firstMessageId = message.MessageId;
         try
         {
-            if ((message.Text! != "Q" || message.Text! != "В") && idUser!.Any(x => x == message?.From?.Id))
-            {
-                int index = message!.Text!.IndexOf(":");
-                if (index != -1)
-                    gptMessage = message.Text!.Substring(index + 1).Trim();
-                var firstMessage = await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
-                firstMessageId = firstMessage.MessageId;
-            }
-            else
-            {
-                var firstMessage = await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
-                firstMessageId = firstMessage.MessageId;
-                return;
-            }
+            gptMessage = message.Text!;
+            var firstMessage = await botClient.SendTextMessageAsync(message.Chat,
+                $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown,
+                cancellationToken: cancellationToken);
+            firstMessageId = firstMessage.MessageId;
+
 
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
@@ -214,7 +230,8 @@ internal class SpecialCommands
                 Messages = messages
             };
             using var response = await httpClient.PostAsJsonAsync(endpoint, requestData);
-            GPTResponse.ResponseData? responseData = await response.Content.ReadFromJsonAsync<GPTResponse.ResponseData>();
+            GPTResponse.ResponseData? responseData =
+                await response.Content.ReadFromJsonAsync<GPTResponse.ResponseData>();
 
             var choices = responseData?.Choices ?? new List<GPTResponse.Choice>();
             var choice = choices[0];
@@ -223,13 +240,17 @@ internal class SpecialCommands
             messages.Add(responseMessage);
             var responseText = responseMessage.Content.Trim();
             _logger.Info($"ChatGPT: {responseText}");
-            await botClient.EditMessageTextAsync(message.Chat,firstMessageId, $"Chat GPT: {responseText}", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(message.Chat, firstMessageId, $"Chat GPT: {responseText}",
+                parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             _logger.Info($"!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
         }
         catch (Exception ex)
         {
-            await botClient.EditMessageTextAsync(message.Chat, firstMessageId, $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
-            _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetQuestionsFromChatGPT), ex);
+            await botClient.EditMessageTextAsync(message.Chat, firstMessageId,
+                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!",
+                parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}",
+                nameof(GetQuestionsFromChatGPT), ex);
             messages.Clear();
         }
     }

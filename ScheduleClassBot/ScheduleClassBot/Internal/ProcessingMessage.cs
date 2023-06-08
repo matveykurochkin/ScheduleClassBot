@@ -3,14 +3,20 @@ using ScheduleClassBot.Processors;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.Extensions.Configuration;
 
 namespace ScheduleClassBot.Internal;
 
 internal class ProcessingMessage
 {
+    private static IConfiguration configuration = new ConfigurationBuilder()
+        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+        .AddJsonFile("appsettings.json")
+        .Build();
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static readonly string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static ulong countLike { get; set; }
+    private static readonly long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     private static void UserList(string name, string surname, string username, long? id)
     {
@@ -40,7 +46,8 @@ internal class ProcessingMessage
         }
     }
 
-    public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -52,13 +59,19 @@ internal class ProcessingMessage
         }
     }
 
-    private static async Task HandleUpdateAsyncInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    private static async Task HandleUpdateAsyncInternal(ITelegramBotClient botClient, Update update,
+        CancellationToken cancellationToken)
     {
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
         {
             var message = update.Message;
 
-            _logger.Info($"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
+            if (message!.Text!.StartsWith(
+                    $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
+                message.Text = message.Text.Split(' ')[1];
+            
+            _logger.Info(
+                $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
 
             UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
             SpecialCommands.countMessage++;
@@ -67,24 +80,30 @@ internal class ProcessingMessage
             {
                 if (SpecialCommands.countMessage % 150 == 0)
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay", cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay",
+                        cancellationToken: cancellationToken);
                     _logger.Info($"!!!PRESENT!!! Best Stickers BusyaEveryDay!");
                 }
 
                 if (message?.Text == "/start"
                     || message?.Text == "Назад ⬅")
                 {
-                    await botClient.SendTextMessageAsync(message.Chat, $"{update.Message?.From?.FirstName}, смотри мои возможности!", replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
-                    await botClient.SendTextMessageAsync(message.Chat, $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
-                                                                       $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
-                                                                       $"Доступные команды:\n" +
-                                                                       $"/start - обновление бота\n" +
-                                                                       $"/todaypmi - расписание на сегодня группы ПМИ-120\n" +
-                                                                       $"/tomorrowpmi - расписание на завтра группы ПМИ-120\n" +
-                                                                       $"/sessionpmi - расписание сессии группы ПМИ-120\n" +
-                                                                       $"/todaypri - расписание на сегодня группы ПРИ-121\n" +
-                                                                       $"/tomorrowpri - расписание на завтра группы ПРИ-121\n" +
-                                                                       $"/sessionpri - расписание сессии группы ПРИ-121", replyMarkup: InlineButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        $"{update.Message?.From?.FirstName}, смотри мои возможности!",
+                        replyMarkup: BotButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(message.Chat,
+                        $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
+                        $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
+                        $"Доступные команды:\n" +
+                        $"/start - обновление бота\n" +
+                        $"/todaypmi - расписание на сегодня группы ПМИ-120\n" +
+                        $"/tomorrowpmi - расписание на завтра группы ПМИ-120\n" +
+                        $"/sessionpmi - расписание сессии группы ПМИ-120\n" +
+                        $"/todaypri - расписание на сегодня группы ПРИ-121\n" +
+                        $"/tomorrowpri - расписание на завтра группы ПРИ-121\n" +
+                        $"/sessionpri - расписание сессии группы ПРИ-121",
+                        replyMarkup: InlineButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -147,14 +166,15 @@ internal class ProcessingMessage
                     return;
                 }
 
-                if (message!.Text.StartsWith("Q")
-                || message!.Text.StartsWith("В"))
+                if (idUser!.Any(x => x == message?.From?.Id))
                 {
                     await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
-                    return;
+                    return; 
                 }
-
-                await botClient.SendTextMessageAsync(message!.Chat, $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!", cancellationToken: cancellationToken);
+                
+                await botClient.SendTextMessageAsync(message!.Chat,
+                    $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!",
+                    cancellationToken: cancellationToken);
                 return;
             }
 
@@ -168,33 +188,36 @@ internal class ProcessingMessage
 
             if (update.CallbackQuery?.Data is not null)
             {
-
                 if (update.CallbackQuery?.Data == "like")
                 {
                     var inlineButton = new InlineKeyboardMarkup(new[]
                     {
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
-                    }
-                     });
-                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
+                        new[]
+                        {
+                            InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
+                            InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
+                        }
+                    });
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
+                        cancellationToken: cancellationToken);
                     return;
                 }
 
                 if (update.CallbackQuery?.Data == "dislike")
                 {
                     var inlineButton = new InlineKeyboardMarkup(new[]
-{
-                    new []
                     {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                        InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
-                    }
-                     });
-                    await botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "Я знал, что ты можешь ошибиться при нажатии на кнопку лайка, поэтому я сразу же исправил эту ошибку! 😊", showAlert: true);
-                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton, cancellationToken: cancellationToken);
+                        new[]
+                        {
+                            InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
+                            InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
+                        }
+                    });
+                    await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
+                        "Я знал, что ты можешь ошибиться при нажатии на кнопку лайка, поэтому я сразу же исправил эту ошибку! 😊",
+                        showAlert: true);
+                    await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
+                        cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -212,13 +235,15 @@ internal class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "specialcommandforgetlogfile")
                 {
-                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforgetlogfile", cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforgetlogfile",
+                        cancellationToken: cancellationToken);
                     return;
                 }
 
                 if (update.CallbackQuery?.Data == "specialcommandforcheckyourprofile")
                 {
-                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforcheckyourprofile", cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforcheckyourprofile",
+                        cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -227,17 +252,20 @@ internal class ProcessingMessage
                     await SpecialCommands.Back(botClient, update, cancellationToken);
                     return;
                 }
+
                 _logger.Info($"Press Inline button! CallbackQuery: {update.CallbackQuery?.Data}");
             }
         }
     }
 
-    public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception,
+        CancellationToken cancellationToken)
     {
         try
         {
             var me = await botClient.GetMeAsync(cancellationToken: cancellationToken);
-            _logger.Error("Error received in telegram bot, name of bot: {firstName}, Error: {error}", me.FirstName, exception);
+            _logger.Error("Error received in telegram bot, name of bot: {firstName}, Error: {error}", me.FirstName,
+                exception);
         }
         catch (Exception ex)
         {

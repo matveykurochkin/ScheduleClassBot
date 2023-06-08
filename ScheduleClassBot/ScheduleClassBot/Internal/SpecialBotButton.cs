@@ -1,33 +1,34 @@
 ﻿using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.Internal;
+
 internal class SpecialBotButton
 {
     public static IReplyMarkup SpecialCommandButton()
     {
         var tgButton = new ReplyKeyboardMarkup(new[]
         {
-    new[]
-    {
-        new KeyboardButton("specialcommandforviewlistusers")
-    },
-        new[]
-    {
-        new KeyboardButton("specialcommandforviewcountmessages")
-    },
-        new[]
-    {
-        new KeyboardButton("specialcommandforgetlogfile")
-    },
-        new[]
-    {
-        new KeyboardButton("specialcommandforcheckyourprofile")
-    },
-        new[]
-    {
-        new KeyboardButton("Назад ⬅")
-    }
-     });
+            new[]
+            {
+                new KeyboardButton("specialcommandforviewlistusers")
+            },
+            new[]
+            {
+                new KeyboardButton("specialcommandforviewcountmessages")
+            },
+            new[]
+            {
+                new KeyboardButton("specialcommandforgetlogfile")
+            },
+            new[]
+            {
+                new KeyboardButton("specialcommandforcheckyourprofile")
+            },
+            new[]
+            {
+                new KeyboardButton("Назад ⬅")
+            }
+        });
         tgButton.ResizeKeyboard = true;
         return tgButton;
     }
@@ -36,23 +37,26 @@ internal class SpecialBotButton
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
         {
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "Просмотр списка пользователей", callbackData: "specialcommandforviewlistusers")
-        },        
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "Просмотр количества написанных сообщений", callbackData: "specialcommandforviewcountmessages")
-        },
-        new []
-        {
-
-            InlineKeyboardButton.WithCallbackData(text: "Получение логов", callbackData: "specialcommandforgetlogfile")
-        },
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "Просмотр информации о пользователе", callbackData: "specialcommandforcheckyourprofile")
-        }
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Просмотр списка пользователей",
+                    callbackData: "specialcommandforviewlistusers")
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Просмотр количества написанных сообщений",
+                    callbackData: "specialcommandforviewcountmessages")
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов",
+                    query: "specialcommandforgetlogfile")
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Просмотр информации о пользователе",
+                   query: "specialcommandforcheckyourprofile")
+            }
         });
         return inlineButton;
     }
@@ -61,10 +65,10 @@ internal class SpecialBotButton
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
         {
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "Назад ⬅", callbackData: "back")
-        }
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Назад ⬅", callbackData: "back")
+            }
         });
         return inlineButton;
     }

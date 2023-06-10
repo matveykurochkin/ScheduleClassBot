@@ -13,6 +13,7 @@ internal class ProcessingMessage
         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
         .AddJsonFile("appsettings.json")
         .Build();
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static readonly string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
     private static ulong countLike { get; set; }
@@ -66,13 +67,19 @@ internal class ProcessingMessage
         {
             var message = update.Message;
 
+            _logger.Info(
+                $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
+            
+            if (message?.Text is null)
+            {
+                await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
+                return;
+            }
+
             if (message!.Text!.StartsWith(
                     $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
                 message.Text = message.Text.Split(' ')[1];
             
-            _logger.Info(
-                $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
-
             UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
             SpecialCommands.countMessage++;
 
@@ -169,16 +176,14 @@ internal class ProcessingMessage
                 if (idUser!.Any(x => x == message?.From?.Id))
                 {
                     await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
-                    return; 
+                    return;
                 }
-                
+
                 await botClient.SendTextMessageAsync(message!.Chat,
                     $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!",
                     cancellationToken: cancellationToken);
                 return;
             }
-
-            await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
         }
 
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)

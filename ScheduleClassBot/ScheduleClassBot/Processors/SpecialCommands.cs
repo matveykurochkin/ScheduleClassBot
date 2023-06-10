@@ -22,7 +22,7 @@ internal class SpecialCommands
 
     private static readonly string? apiKey = configuration.GetSection("OpenAI:ChatGPTKey").Value;
     private static string endpoint = "https://api.openai.com/v1/chat/completions";
-    private static HashSet<GPTResponse.Message> messages = new HashSet<GPTResponse.Message>();
+    private static List<GPTResponse.Message> messages = new List<GPTResponse.Message>();
     private static string? gptMessage { get; set; }
 
     internal static ulong countMessage { get; set; }

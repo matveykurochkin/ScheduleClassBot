@@ -16,7 +16,7 @@ internal class GPTResponse
         [JsonPropertyName("model")]
         public string ModelId { get; set; } = "";
         [JsonPropertyName("messages")]
-        public HashSet<Message> Messages { get; set; } = new();
+        public List<Message> Messages { get; set; } = new();
     }
 
     public class ResponseData

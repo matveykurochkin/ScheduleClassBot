@@ -2,7 +2,7 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal class SpecialBotButton
+internal static class SpecialBotButton
 {
     public static IReplyMarkup SpecialCommandButton()
     {
@@ -28,8 +28,10 @@ internal class SpecialBotButton
             {
                 new KeyboardButton("Назад ⬅")
             }
-        });
-        tgButton.ResizeKeyboard = true;
+        })
+        {
+            ResizeKeyboard = true
+        };
         return tgButton;
     }
 

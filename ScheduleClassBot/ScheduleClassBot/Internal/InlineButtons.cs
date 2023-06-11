@@ -2,7 +2,7 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal class InlineButtons
+internal static class InlineButtons
 {
     public static InlineKeyboardMarkup InlineButtonOnBot()
     {

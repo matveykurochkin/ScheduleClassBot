@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 
 namespace ScheduleClassBot.Internal;
+
 internal class Run : IHostedService
 {
     private readonly IConfiguration _cfg;
@@ -14,6 +15,7 @@ internal class Run : IHostedService
         _cfg = cfg;
     }
 
+    // ReSharper disable once InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -26,10 +28,7 @@ internal class Run : IHostedService
             _logger.Info($"Бот {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName} успешно запущен!");
             var cts = new CancellationTokenSource();
             cancellationToken = cts.Token;
-            var receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = { },
-            };
+            var receiverOptions = new ReceiverOptions();
 
             telegramBot.StartReceiving(
                 new DefaultUpdateHandler(ProcessingMessage.HandleUpdateAsync, ProcessingMessage.HandleErrorAsync),
@@ -41,6 +40,7 @@ internal class Run : IHostedService
         {
             _logger.Error($"Error message: {ex.Message}");
         }
+
         return Task.CompletedTask;
     }
 
@@ -49,5 +49,4 @@ internal class Run : IHostedService
         _logger.Info("Service stopping");
         return Task.CompletedTask;
     }
-
 }

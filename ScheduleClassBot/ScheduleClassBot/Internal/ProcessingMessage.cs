@@ -7,16 +7,24 @@ using Microsoft.Extensions.Configuration;
 
 namespace ScheduleClassBot.Internal;
 
-internal class ProcessingMessage
+internal static class ProcessingMessage
 {
-    private static IConfiguration configuration = new ConfigurationBuilder()
+    // ReSharper disable once InconsistentNaming
+    private static readonly IConfiguration configuration = new ConfigurationBuilder()
         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
         .AddJsonFile("appsettings.json")
         .Build();
 
+    // ReSharper disable once InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    // ReSharper disable once InconsistentNaming
     private static readonly string _projectPath = AppDomain.CurrentDomain.BaseDirectory;
+
+    // ReSharper disable once InconsistentNaming
     private static ulong countLike { get; set; }
+
+    // ReSharper disable once InconsistentNaming
     private static readonly long[]? idUser = configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     private static void UserList(string name, string surname, string username, long? id)
@@ -69,21 +77,21 @@ internal class ProcessingMessage
 
             _logger.Info(
                 $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!\n\tТекст сообщения: {message?.Text}\n\tID Пользователя: {message?.From?.Id}\n\tUsername: @{message?.From?.Username}");
-            
+
             if (message?.Text is null)
             {
                 await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
                 return;
             }
 
-            if (message!.Text!.StartsWith(
+            if (message.Text!.StartsWith(
                     $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
                 message.Text = message.Text.Split(' ')[1];
-            
-            UserList(message?.From?.FirstName!, message?.From?.LastName!, message?.From?.Username!, message?.From?.Id);
+
+            UserList(message.From?.FirstName!, message.From?.LastName!, message.From?.Username!, message.From?.Id);
             SpecialCommands.countMessage++;
 
-            if (message?.Text is not null)
+            if (message.Text is not null)
             {
                 if (SpecialCommands.countMessage % 150 == 0)
                 {
@@ -93,8 +101,8 @@ internal class ProcessingMessage
                     _logger.Info($"!!!PRESENT!!! Best Stickers BusyaEveryDay!");
                 }
 
-                if (message?.Text == "/start"
-                    || message?.Text == "Назад ⬅")
+                if (message.Text == "/start"
+                    || message.Text == "Назад ⬅")
                 {
                     await botClient.SendTextMessageAsync(message.Chat,
                         $"{update.Message?.From?.FirstName}, смотри мои возможности!",
@@ -114,72 +122,72 @@ internal class ProcessingMessage
                     return;
                 }
 
-                if (message?.Text == "ПМИ-120"
-                    || message?.Text == "ПРИ-121")
+                if (message.Text == "ПМИ-120"
+                    || message.Text == "ПРИ-121")
                 {
-                    await GetSchedule.GetButtonForGroup(botClient, message, update, message?.Text!);
+                    await GetSchedule.GetButtonForGroup(botClient, message, update, message.Text!);
                     return;
                 }
 
-                if (GetSchedule.dayOfWeekPMI.Contains(message!.Text)
-                    || message?.Text == "Расписание на сегодня ПМИ-120"
-                    || message?.Text == "/todaypmi"
-                    || message?.Text == "Расписание на завтра ПМИ-120"
-                    || message?.Text == "/tomorrowpmi")
+                if (GetSchedule.dayOfWeekPMI.Contains(message.Text)
+                    || message.Text == "Расписание на сегодня ПМИ-120"
+                    || message.Text == "/todaypmi"
+                    || message.Text == "Расписание на завтра ПМИ-120"
+                    || message.Text == "/tomorrowpmi")
                 {
-                    await GetSchedule.GetScheduleForGroupPMI(botClient, message, message!.Text);
+                    await GetSchedule.GetScheduleForGroupPMI(botClient, message, message.Text);
                     return;
                 }
 
-                if (GetSchedule.dayOfWeekPRI.Contains(message!.Text)
-                    || message?.Text == "Расписание на сегодня ПРИ-121"
-                    || message?.Text == "/todaypri"
-                    || message?.Text == "Расписание на завтра ПРИ-121"
-                    || message?.Text == "/tomorrowpri")
+                if (GetSchedule.dayOfWeekPRI.Contains(message.Text)
+                    || message.Text == "Расписание на сегодня ПРИ-121"
+                    || message.Text == "/todaypri"
+                    || message.Text == "Расписание на завтра ПРИ-121"
+                    || message.Text == "/tomorrowpri")
                 {
-                    await GetSchedule.GetScheduleForGroupPRI(botClient, message, message!.Text);
+                    await GetSchedule.GetScheduleForGroupPRI(botClient, message, message.Text);
                     return;
                 }
 
-                if (message?.Text == "Расписание сессии ПМИ-120"
-                    || message?.Text == "/sessionpmi")
+                if (message.Text == "Расписание сессии ПМИ-120"
+                    || message.Text == "/sessionpmi")
                 {
                     await GetSessionSchedule.GetSessionOnPMI(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message?.Text == "Расписание сессии ПРИ-121"
-                    || message?.Text == "/sessionpri")
+                if (message.Text == "Расписание сессии ПРИ-121"
+                    || message.Text == "/sessionpri")
                 {
                     await GetSessionSchedule.GetSessionOnPRI(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands"))
+                if (message.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands"))
                 {
                     await SpecialCommands.GetButtonWithSpecialCommands(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.StartsWith("specialcommandforgetlogfile"))
+                if (message.Text.StartsWith("specialcommandforgetlogfile"))
                 {
                     await SpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (message!.Text.StartsWith("specialcommandforcheckyourprofile"))
+                if (message.Text.StartsWith("specialcommandforcheckyourprofile"))
                 {
                     await SpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                if (idUser!.Any(x => x == message?.From?.Id))
+                if (idUser!.Any(x => x == message.From?.Id))
                 {
-                    await SpecialCommands.GetQuestionsFromChatGPT(botClient, update, message, cancellationToken);
+                    await SpecialCommands.GetQuestionsFromChatGpt(botClient, update, message, cancellationToken);
                     return;
                 }
 
-                await botClient.SendTextMessageAsync(message!.Chat,
+                await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!",
                     cancellationToken: cancellationToken);
                 return;
@@ -220,7 +228,7 @@ internal class ProcessingMessage
                     });
                     await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
                         "Я знал, что ты можешь ошибиться при нажатии на кнопку лайка, поэтому я сразу же исправил эту ошибку! 😊",
-                        showAlert: true);
+                        showAlert: true, cancellationToken: cancellationToken);
                     await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
                         cancellationToken: cancellationToken);
                     return;

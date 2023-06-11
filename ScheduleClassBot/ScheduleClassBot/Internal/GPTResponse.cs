@@ -2,7 +2,7 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal class GPTResponse
+internal abstract class GptResponse
 {
    public class Message
     {

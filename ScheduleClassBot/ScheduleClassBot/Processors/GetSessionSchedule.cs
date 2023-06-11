@@ -3,8 +3,9 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 
 namespace ScheduleClassBot.Processors;
-internal class GetSessionSchedule
+internal static class GetSessionSchedule
 {
+    // ReSharper disable once InconsistentNaming
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static async Task GetSessionOnPMI(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
@@ -23,7 +24,7 @@ internal class GetSessionSchedule
                           $"ЭКЗАМЕН: Понедельник 26.06.2023 08:30 230 - 3\n\n" +
                                       $"4⃣  ЭКЗАМЕН Методы оптимизации и исследование операций Абрахин С.И.\n" +
                           $"КОНСУЛЬТАЦИЯ: Четверг 29.06.2023 16:00 100 - 3\n" +
-                          $"ЭКЗАМЕН: Пятница 30.06.2023 08:30 100 - 3\n");
+                          $"ЭКЗАМЕН: Пятница 30.06.2023 08:30 100 - 3\n", cancellationToken: cancellationToken);
 
             _logger.Info($"View session schedule for group PMI success!");
         }
@@ -51,7 +52,7 @@ internal class GetSessionSchedule
                           $"КОНСУЛЬТАЦИЯ: Четверг 29.06.2023 14:00 127б - 1 Ермолаева Л.Д.\n" +
                           $"Четверг 29.06.2023 14:00 135 - 1 Койкова Т.И.\n" +
                           $"ЭКЗАМЕН: Пятница 30.06.2023 08:30 127б - 1 Ермолаева Л.Д.\n" +
-                          $"Пятница 30.06.2023 08:30 135 - 1 Койкова Т.И.\n");
+                          $"Пятница 30.06.2023 08:30 135 - 1 Койкова Т.И.\n", cancellationToken: cancellationToken);
 
             _logger.Info($"View session schedule for group PMI success!");
         }

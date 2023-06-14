@@ -80,7 +80,7 @@ internal static class ProcessingMessage
 
             if (message?.Text is null)
             {
-                await botClient.SendTextMessageAsync(message!.Chat, $"👍", cancellationToken: cancellationToken);
+                await botClient.SendTextMessageAsync(message!.Chat, "👍", cancellationToken: cancellationToken);
                 return;
             }
 
@@ -98,7 +98,7 @@ internal static class ProcessingMessage
                     await botClient.SendTextMessageAsync(message.Chat,
                         $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay",
                         cancellationToken: cancellationToken);
-                    _logger.Info($"!!!PRESENT!!! Best Stickers BusyaEveryDay!");
+                    _logger.Info("!!!PRESENT!!! Best Stickers BusyaEveryDay!");
                 }
 
                 if (message.Text == "/start"
@@ -208,7 +208,7 @@ internal static class ProcessingMessage
                         new[]
                         {
                             InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                            InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
+                            InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
                         }
                     });
                     await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
@@ -223,7 +223,7 @@ internal static class ProcessingMessage
                         new[]
                         {
                             InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++countLike})", callbackData: "like"),
-                            InlineKeyboardButton.WithCallbackData(text: $"👎🏻", callbackData: "dislike")
+                            InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
                         }
                     });
                     await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
@@ -248,14 +248,14 @@ internal static class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "specialcommandforgetlogfile")
                 {
-                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforgetlogfile",
+                    await botClient.SendTextMessageAsync(chatId, "specialcommandforgetlogfile",
                         cancellationToken: cancellationToken);
                     return;
                 }
 
                 if (update.CallbackQuery?.Data == "specialcommandforcheckyourprofile")
                 {
-                    await botClient.SendTextMessageAsync(chatId, $"specialcommandforcheckyourprofile",
+                    await botClient.SendTextMessageAsync(chatId, "specialcommandforcheckyourprofile",
                         cancellationToken: cancellationToken);
                     return;
                 }

@@ -26,7 +26,7 @@ internal static class GetSessionSchedule
                           $"КОНСУЛЬТАЦИЯ: Четверг 29.06.2023 16:00 100 - 3\n" +
                           $"ЭКЗАМЕН: Пятница 30.06.2023 08:30 100 - 3\n", cancellationToken: cancellationToken);
 
-            _logger.Info($"View session schedule for group PMI success!");
+            _logger.Info("View session schedule for group PMI success!");
         }
         catch (Exception ex)
         {

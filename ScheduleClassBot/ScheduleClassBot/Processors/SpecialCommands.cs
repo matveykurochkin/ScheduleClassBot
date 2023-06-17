@@ -116,7 +116,7 @@ internal static class SpecialCommands
                 $"\nКоличество отправленных подарков: {countMessage / 150}!",
                 replyMarkup: SpecialBotButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
-            _logger.Info($"!!!SPECIAL COMMAND!!! View count message success!");
+            _logger.Info("!!!SPECIAL COMMAND!!! View count message success!");
         }
         catch (Exception ex)
         {
@@ -166,7 +166,7 @@ internal static class SpecialCommands
                     $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken);
 
-            _logger.Info($"!!!SPECIAL COMMAND!!! Get log file success!");
+            _logger.Info("!!!SPECIAL COMMAND!!! Get log file success!");
         }
         catch (Exception ex)
         {
@@ -219,16 +219,16 @@ internal static class SpecialCommands
     public static async Task GetQuestionsFromChatGpt(ITelegramBotClient botClient, Update update, Message message,
         CancellationToken cancellationToken)
     {
-        int firstMessageId = message.MessageId;
+        var currentMessageId = message.MessageId;
         try
         {
             gptMessage = message.Text!;
             var firstMessage = await botClient.SendTextMessageAsync(message.Chat,
                 $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken);
-            firstMessageId = firstMessage.MessageId;
+            currentMessageId = firstMessage.MessageId;
 
-            HttpClient httpClient = new HttpClient();
+            using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
             GptResponse.Message mes = new GptResponse.Message()
@@ -245,8 +245,7 @@ internal static class SpecialCommands
                 Messages = messages
             };
             using var response = await httpClient.PostAsJsonAsync(endpoint, requestData, cancellationToken: cancellationToken);
-            GptResponse.ResponseData? responseData =
-                await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(cancellationToken: cancellationToken);
+            GptResponse.ResponseData? responseData = await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(cancellationToken: cancellationToken);
 
             var choices = responseData?.Choices ?? new List<GptResponse.Choice>();
             var choice = choices[0];
@@ -255,15 +254,14 @@ internal static class SpecialCommands
             messages.Add(responseMessage);
             var responseText = responseMessage.Content.Trim();
             _logger.Info($"ChatGPT: {responseText}");
-            await botClient.EditMessageTextAsync(message.Chat, firstMessageId, $"Chat GPT: {responseText}",
+            await botClient.EditMessageTextAsync(message.Chat, currentMessageId, $"Chat GPT: {responseText}",
                 parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
-            _logger.Info($"!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
+            _logger.Info("!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
         }
         catch (Exception ex)
         {
-            await botClient.EditMessageTextAsync(message.Chat, firstMessageId,
-                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!",
-                parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await botClient.EditMessageTextAsync(message.Chat, currentMessageId,
+                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", cancellationToken: cancellationToken);
             _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}",
                 nameof(GetQuestionsFromChatGpt), ex);
             messages.Clear();

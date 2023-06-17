@@ -60,7 +60,9 @@ internal static class ProcessingMessage
     {
         try
         {
-            await HandleUpdateAsyncInternal(botClient, update, cancellationToken);
+#pragma warning disable CS4014
+            await Task.Run(() => { HandleUpdateAsyncInternal(botClient, update, cancellationToken); }, cancellationToken);
+#pragma warning restore CS4014
         }
         catch (Exception ex)
         {

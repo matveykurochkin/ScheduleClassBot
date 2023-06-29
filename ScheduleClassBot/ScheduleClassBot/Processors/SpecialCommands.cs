@@ -141,14 +141,15 @@ internal static class SpecialCommands
                     logdate = message.Text!.Substring(index + 1).Trim();
 
                 pathOnProject = AppDomain.CurrentDomain.BaseDirectory;
-                path = Path.Combine(pathOnProject, $"log/{logdate}");
+                path = Path.Combine(pathOnProject, $"log{Path.DirectorySeparatorChar}{logdate}");
 
                 if (System.IO.File.Exists(path))
                 {
                     await using FileStream fileStream = new FileStream(path, FileMode.Open);
                     InputFileStream inputFile = new InputFileStream(fileStream, logdate);
                     await botClient.SendDocumentAsync(message.Chat, inputFile,
-                        caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!", cancellationToken: cancellationToken);
+                        caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!",
+                        cancellationToken: cancellationToken);
                 }
                 else
                     await botClient.SendTextMessageAsync(message.Chat,
@@ -174,7 +175,7 @@ internal static class SpecialCommands
         }
     }
 
-    public static async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Update update, Message message,
+    public static async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Message message,
         CancellationToken cancellationToken)
     {
         try
@@ -239,13 +240,16 @@ internal static class SpecialCommands
 
             messages.Add(mes);
 
-            GptResponse.Request requestData = new GptResponse.Request()
+            GptResponse.Request requestData = new GptResponse.Request
             {
                 ModelId = "gpt-3.5-turbo",
                 Messages = messages
             };
-            using var response = await httpClient.PostAsJsonAsync(endpoint, requestData, cancellationToken: cancellationToken);
-            GptResponse.ResponseData? responseData = await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(cancellationToken: cancellationToken);
+            using var response =
+                await httpClient.PostAsJsonAsync(endpoint, requestData, cancellationToken: cancellationToken);
+            GptResponse.ResponseData? responseData =
+                await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(
+                    cancellationToken: cancellationToken);
 
             var choices = responseData?.Choices ?? new List<GptResponse.Choice>();
             var choice = choices[0];
@@ -261,7 +265,8 @@ internal static class SpecialCommands
         catch (Exception ex)
         {
             await botClient.EditMessageTextAsync(message.Chat, currentMessageId,
-                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!", cancellationToken: cancellationToken);
+                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!",
+                cancellationToken: cancellationToken);
             _logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}",
                 nameof(GetQuestionsFromChatGpt), ex);
             messages.Clear();

@@ -95,7 +95,7 @@ internal static class ProcessingMessage
 
             if (message.Text is not null)
             {
-                if (SpecialCommands.countMessage % 150 == 0)
+                if (SpecialCommands.countMessage % 100 == 0)
                 {
                     await botClient.SendTextMessageAsync(message.Chat,
                         $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay",
@@ -167,7 +167,7 @@ internal static class ProcessingMessage
 
                 if (message.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands"))
                 {
-                    await SpecialCommands.GetButtonWithSpecialCommands(botClient, update, message, cancellationToken);
+                    await SpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
                     return;
                 }
 

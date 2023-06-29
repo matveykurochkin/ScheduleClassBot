@@ -12,7 +12,6 @@ sc.exe delete ".NET Shedule Bot"
 ## Команды
 ```bash
 start - обновление бота 
-listgroup - список групп
 todaypmi - расписание на сегодня ПМИ-120
 tomorrowpmi - расписание на завтра ПМИ-120
 sessionpmi - расписание сессии ПМИ-120

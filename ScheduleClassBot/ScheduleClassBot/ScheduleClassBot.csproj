@@ -5,6 +5,10 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Company>Matvey Kurochkin</Company>
+		<Product>Schedule Bot</Product>
+		<AssemblyVersion>10.2</AssemblyVersion>
+		<FileVersion>10.2</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

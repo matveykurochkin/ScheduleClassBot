@@ -15,30 +15,31 @@ internal class Run : IHostedService
         _cfg = cfg;
     }
 
-    // ReSharper disable once InconsistentNaming
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
+            var handleUpdate = new ProcessingMessage();
             var token = _cfg.GetSection("Tokens")["TelegramBotToken"];
             var telegramBot = new TelegramBotClient(token!);
 
-            _logger.Info($"Бот {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName} успешно запущен!");
+            Logger.Info(
+                $"Бот {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName} успешно запущен!");
             var cts = new CancellationTokenSource();
             cancellationToken = cts.Token;
             var receiverOptions = new ReceiverOptions();
 
             telegramBot.StartReceiving(
-                new DefaultUpdateHandler(ProcessingMessage.HandleUpdateAsync, ProcessingMessage.HandleErrorAsync),
+                new DefaultUpdateHandler(handleUpdate.HandleUpdateAsync, handleUpdate.HandleErrorAsync),
                 receiverOptions,
                 cancellationToken
             );
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error message: {ex.Message}");
+            Logger.Error($"Error message: {ex.Message}");
         }
 
         return Task.CompletedTask;
@@ -46,7 +47,7 @@ internal class Run : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
-        _logger.Info("Service stopping");
+        Logger.Info("Service stopping");
         return Task.CompletedTask;
     }
 }

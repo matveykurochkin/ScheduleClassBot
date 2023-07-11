@@ -2,17 +2,17 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal static class InlineButtons
+internal class InlineButtons
 {
-    public static InlineKeyboardMarkup InlineButtonOnBot()
+    public InlineKeyboardMarkup InlineButtonOnBot()
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
         {
-        new []
-        {
-            InlineKeyboardButton.WithCallbackData(text: "👍🏻", callbackData: "like"),
-            InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
-        }
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "👍🏻", callbackData: "like"),
+                InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
+            }
         });
         return inlineButton;
     }

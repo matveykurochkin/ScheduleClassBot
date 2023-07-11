@@ -2,9 +2,9 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal static class BotButtons
+internal class BotButtons
 {
-    public static IReplyMarkup MainButtonOnBot()
+    public IReplyMarkup MainButtonOnBot()
     {
         var tgButton = new ReplyKeyboardMarkup(new[]
         {
@@ -20,7 +20,7 @@ internal static class BotButtons
         return tgButton;
     }
 
-    public static IReplyMarkup AllGroup(string nameGroup)
+    public IReplyMarkup AllGroup(string nameGroup)
     {
         var tgButton = new ReplyKeyboardMarkup(new[]
         {

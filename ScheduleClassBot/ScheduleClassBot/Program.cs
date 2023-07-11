@@ -8,8 +8,7 @@ namespace ScheduleClassBot;
 
 static class Program
 {
-    // ReSharper disable once InconsistentNaming
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     static async Task Main()
     {
@@ -23,11 +22,11 @@ static class Program
                 .Build();
 
             await host.RunAsync();
-            _logger.Info("Running app success");
+            Logger.Info("Running app success");
         }
         catch (Exception ex)
         {
-            _logger.Error("Error running app. {method}: {error}",nameof(Main), ex);
+            Logger.Error("Error running app. {method}: {error}", nameof(Main), ex);
         }
     }
 }

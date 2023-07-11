@@ -81,7 +81,7 @@ git reset --hard HEAD
 git pull
 
 echo build
-dotnet publish /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot.csproj -c Release -r linux-x64 --self-contained
+dotnet publish /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot.csproj -c Release -r linux-x64 --self-contained
 
 echo bakup
 mkdir -p /opt/schedule-bot/bak
@@ -92,7 +92,7 @@ cp /opt/schedule-bot/linux-x64/appsettings.json /opt/schedule-bot/bak/appsetting
 echo copy
 rm -rf /opt/schedule-bot/linux-x64
 mkdir -p /opt/schedule-bot/linux-x64
-cp -R  /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot/bin/Release/net7.0/linux-x64/publish/* /opt/schedule-bot/linux-x64
+cp -R  /opt/src/ScheduleClassBot/ScheduleClassBot/bin/Release/net7.0/linux-x64/publish/* /opt/schedule-bot/linux-x64
 
 echo restore from bakup
 cp /opt/schedule-bot/bak/ListUsers.txt /opt/schedule-bot/linux-x64/ListUsers.txt

@@ -2,40 +2,9 @@
 
 namespace ScheduleClassBot.Internal;
 
-internal static class SpecialBotButton
+internal class SpecialBotButton
 {
-    public static IReplyMarkup SpecialCommandButton()
-    {
-        var tgButton = new ReplyKeyboardMarkup(new[]
-        {
-            new[]
-            {
-                new KeyboardButton("specialcommandforviewlistusers")
-            },
-            new[]
-            {
-                new KeyboardButton("specialcommandforviewcountmessages")
-            },
-            new[]
-            {
-                new KeyboardButton("specialcommandforgetlogfile")
-            },
-            new[]
-            {
-                new KeyboardButton("specialcommandforcheckyourprofile")
-            },
-            new[]
-            {
-                new KeyboardButton("Назад ⬅")
-            }
-        })
-        {
-            ResizeKeyboard = true
-        };
-        return tgButton;
-    }
-
-    public static InlineKeyboardMarkup SpecialCommandInlineButton()
+    public InlineKeyboardMarkup SpecialCommandInlineButton()
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
         {
@@ -57,13 +26,13 @@ internal static class SpecialBotButton
             new[]
             {
                 InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Просмотр информации о пользователе",
-                   query: "specialcommandforcheckyourprofile")
+                    query: "specialcommandforcheckyourprofile")
             }
         });
         return inlineButton;
     }
 
-    public static InlineKeyboardMarkup SpecialBackInlineButton()
+    public InlineKeyboardMarkup SpecialBackInlineButton()
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
         {

@@ -26,7 +26,7 @@ internal class ProcessingMessage
     private readonly GetSessionSchedule _getSession = new();
     private readonly GetSchedule _getSchedule = new();
     private readonly InlineButtons _inlineButtons = new();
-    private readonly BotButtons.ReplyButtons _replyButtons = new();
+    private readonly ReplyButtons _replyButtons = new();
 
     private void UserList(string name, string surname, string username, long? id)
     {

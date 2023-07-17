@@ -6,11 +6,11 @@ using Telegram.Bot.Polling;
 
 namespace ScheduleClassBot.Internal;
 
-internal class Run : IHostedService
+internal class BotRun : IHostedService
 {
     private readonly IConfiguration _cfg;
 
-    public Run(IConfiguration cfg)
+    public BotRun(IConfiguration cfg)
     {
         _cfg = cfg;
     }

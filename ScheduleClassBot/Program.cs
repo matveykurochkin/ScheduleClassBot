@@ -17,7 +17,7 @@ static class Program
             using IHost host = Host.CreateDefaultBuilder()
                 .ConfigureHostConfiguration(cfgBuilder => { cfgBuilder.AddJsonFile("appsettings.json"); })
                 .ConfigureServices(
-                    services => { services.AddHostedService<Run>(); })
+                    services => { services.AddHostedService<BotRun>(); })
                 .UseWindowsService(options => { options.ServiceName = ".NET StockBot"; })
                 .Build();
 

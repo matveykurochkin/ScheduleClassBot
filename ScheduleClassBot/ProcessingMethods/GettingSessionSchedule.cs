@@ -1,10 +1,10 @@
 ﻿using NLog;
-using Telegram.Bot.Types;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 
-namespace ScheduleClassBot.Processors;
+namespace ScheduleClassBot.ProcessingMethods;
 
-internal class GetSessionSchedule
+internal class GettingSessionSchedule
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

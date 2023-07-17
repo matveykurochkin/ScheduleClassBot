@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using ScheduleClassBot.Internal;
+using ScheduleClassBot.StartupServiceSettings;
 
 namespace ScheduleClassBot;
 
@@ -10,14 +10,14 @@ static class Program
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    static async Task Main()
+    private static async Task Main()
     {
         try
         {
             using IHost host = Host.CreateDefaultBuilder()
                 .ConfigureHostConfiguration(cfgBuilder => { cfgBuilder.AddJsonFile("appsettings.json"); })
                 .ConfigureServices(
-                    services => { services.AddHostedService<BotRun>(); })
+                    services => { services.AddHostedService<BotRunService>(); })
                 .UseWindowsService(options => { options.ServiceName = ".NET StockBot"; })
                 .Build();
 

@@ -1,14 +1,14 @@
-﻿using NLog;
-using ScheduleClassBot.Processors;
+﻿using Microsoft.Extensions.Configuration;
+using NLog;
+using ScheduleClassBot.BotButtons;
+using ScheduleClassBot.ProcessingMethods;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.Extensions.Configuration;
-using ScheduleClassBot.BotButtons;
 
-namespace ScheduleClassBot.Internal;
+namespace ScheduleClassBot.Handler;
 
-internal class ProcessingMessage
+internal class MessageHandler
 {
     private static readonly IConfiguration Configuration = new ConfigurationBuilder()
         .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -22,9 +22,9 @@ internal class ProcessingMessage
 
     private readonly long[]? _idUser = Configuration.GetSection("UserID:IdUser").Get<long[]>();
 
-    private readonly GetSpecialCommands _getSpecialCommands = new();
-    private readonly GetSessionSchedule _getSession = new();
-    private readonly GetSchedule _getSchedule = new();
+    private readonly GettingSpecialCommands _gettingSpecialCommands = new();
+    private readonly GettingSessionSchedule _gettingSession = new();
+    private readonly GettingSchedule _gettingSchedule = new();
     private readonly InlineButtons _inlineButtons = new();
     private readonly ReplyButtons _replyButtons = new();
 
@@ -93,11 +93,11 @@ internal class ProcessingMessage
                 message.Text = message.Text.Split(' ')[1];
 
             UserList(message.From?.FirstName!, message.From?.LastName!, message.From?.Username!, message.From?.Id);
-            GetSpecialCommands.CountMessage++;
+            GettingSpecialCommands.CountMessage++;
 
             if (message.Text is not null)
             {
-                if (GetSpecialCommands.CountMessage % 100 == 0)
+                if (GettingSpecialCommands.CountMessage % 100 == 0)
                 {
                     await botClient.SendTextMessageAsync(message.Chat,
                         $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁\nhttps://t.me/addstickers/BusyaEveryDay",
@@ -129,65 +129,65 @@ internal class ProcessingMessage
                 if (message.Text == "ПМИ-120"
                     || message.Text == "ПРИ-121")
                 {
-                    await _getSchedule.GetButtonForGroup(botClient, message, update, message.Text!);
+                    await _gettingSchedule.GetButtonForGroup(botClient, message, update, message.Text!);
                     return;
                 }
 
-                if (GetSchedule.DayOfWeekPmi.Contains(message.Text)
+                if (GettingSchedule.DayOfWeekPmi.Contains(message.Text)
                     || message.Text == "Расписание на сегодня ПМИ-120"
                     || message.Text == "/todaypmi"
                     || message.Text == "Расписание на завтра ПМИ-120"
                     || message.Text == "/tomorrowpmi")
                 {
-                    await _getSchedule.GetScheduleForGroupPMI(botClient, message, message.Text);
+                    await _gettingSchedule.GetScheduleForGroupPMI(botClient, message, message.Text);
                     return;
                 }
 
-                if (GetSchedule.DayOfWeekPri.Contains(message.Text)
+                if (GettingSchedule.DayOfWeekPri.Contains(message.Text)
                     || message.Text == "Расписание на сегодня ПРИ-121"
                     || message.Text == "/todaypri"
                     || message.Text == "Расписание на завтра ПРИ-121"
                     || message.Text == "/tomorrowpri")
                 {
-                    await _getSchedule.GetScheduleForGroupPRI(botClient, message, message.Text);
+                    await _gettingSchedule.GetScheduleForGroupPRI(botClient, message, message.Text);
                     return;
                 }
 
                 if (message.Text == "Расписание сессии ПМИ-120"
                     || message.Text == "/sessionpmi")
                 {
-                    await _getSession.GetSessionOnPMI(botClient, update, message, cancellationToken);
+                    await _gettingSession.GetSessionOnPMI(botClient, update, message, cancellationToken);
                     return;
                 }
 
                 if (message.Text == "Расписание сессии ПРИ-121"
                     || message.Text == "/sessionpri")
                 {
-                    await _getSession.GetSessionOnPRI(botClient, update, message, cancellationToken);
+                    await _gettingSession.GetSessionOnPRI(botClient, update, message, cancellationToken);
                     return;
                 }
 
                 if (message.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands"))
                 {
-                    await _getSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
+                    await _gettingSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
                     return;
                 }
 
                 if (message.Text.StartsWith("specialcommandforgetlogfile"))
                 {
-                    await _getSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
+                    await _gettingSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
                     return;
                 }
 
                 if (message.Text.StartsWith("specialcommandforcheckyourprofile"))
                 {
-                    await _getSpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
+                    await _gettingSpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
                     return;
                 }
 
                 if (_idUser!.Any(x => x == message.From?.Id))
                 {
-                    await _getSpecialCommands.GetQuestionsFromChatGpt(botClient, update, message, cancellationToken);
+                    await _gettingSpecialCommands.GetAnswersFromChatGpt(botClient, update, message, cancellationToken);
                     return;
                 }
 
@@ -240,13 +240,13 @@ internal class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "specialcommandforviewlistusers")
                 {
-                    await _getSpecialCommands.GetUsersList(botClient, update, cancellationToken);
+                    await _gettingSpecialCommands.GetUsersList(botClient, update, cancellationToken);
                     return;
                 }
 
                 if (update.CallbackQuery?.Data == "specialcommandforviewcountmessages")
                 {
-                    await _getSpecialCommands.GetCountMessage(botClient, update, update.Message!, cancellationToken);
+                    await _gettingSpecialCommands.GetCountMessage(botClient, update, cancellationToken);
                     return;
                 }
 
@@ -266,7 +266,7 @@ internal class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "back")
                 {
-                    await _getSpecialCommands.Back(botClient, update, cancellationToken);
+                    await _gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);
                     return;
                 }
 

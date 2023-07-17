@@ -50,7 +50,7 @@ internal class GetSpecialCommands
         }
     }
 
-    public async Task GetUsersList(ITelegramBotClient botClient, Update update, Message message,
+    public async Task GetUsersList(ITelegramBotClient botClient, Update update,
         CancellationToken cancellationToken)
     {
         try

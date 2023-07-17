@@ -240,7 +240,7 @@ internal class ProcessingMessage
 
                 if (update.CallbackQuery?.Data == "specialcommandforviewlistusers")
                 {
-                    await _getSpecialCommands.GetUsersList(botClient, update, update.Message!, cancellationToken);
+                    await _getSpecialCommands.GetUsersList(botClient, update, cancellationToken);
                     return;
                 }
 

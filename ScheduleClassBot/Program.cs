@@ -22,7 +22,7 @@ static class Program
                 .Build();
 
             await host.RunAsync();
-            Logger.Info("Running app success");
+            Logger.Info("Stopping app success");
         }
         catch (Exception ex)
         {

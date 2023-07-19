@@ -55,7 +55,7 @@ internal class GettingSchedule
 
         return dayArr[todayIndex + 1];
     }
-    
+
     internal async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update,
         string nameGroup)
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NLog;
-using ScheduleClassBot.Handler;
+using ScheduleClassBot.Handlers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 
@@ -22,7 +22,7 @@ internal class BotRunService : IHostedService
     {
         try
         {
-            var handleUpdate = new MessageHandler();
+            var handleUpdate = new MainHandler();
             var token = _cfg.GetSection("Tokens")["TelegramBotToken"];
             var telegramBot = new TelegramBotClient(token!);
 

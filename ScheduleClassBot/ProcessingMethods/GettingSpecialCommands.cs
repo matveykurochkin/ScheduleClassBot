@@ -18,16 +18,7 @@ internal class GettingSpecialCommands
         .Build();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static readonly string ProjectPath = AppDomain.CurrentDomain.BaseDirectory;
-    private static DateTime _dateTime;
-    private static readonly string? ApiKey = Configuration.GetSection("OpenAI:ChatGPTKey").Value;
-    private const string EndPoint = "https://api.openai.com/v1/chat/completions";
-    private static readonly List<GptResponse.Message> Messages = new();
-    private string? GptMessage { get; set; }
     internal static ulong CountMessage { get; set; }
-    private string? PathOnProject { get; set; }
-    private string? Path { get; set; }
-    private string? LogDate { get; set; }
 
     private readonly SpecialInlineButtons _specialInlineButtons = new();
 
@@ -51,14 +42,13 @@ internal class GettingSpecialCommands
         }
     }
 
-    public async Task GetUsersList(ITelegramBotClient botClient, Update update,
-        CancellationToken cancellationToken)
+    public async Task GetUsersList(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
         {
             var callbackQuery = update.CallbackQuery;
             var chatId = callbackQuery!.Message!.Chat.Id;
-            string combinePath = System.IO.Path.Combine(ProjectPath, "ListUsers.txt");
+            string combinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ListUsers.txt");
 
             if (System.IO.File.Exists(combinePath))
             {
@@ -74,13 +64,13 @@ internal class GettingSpecialCommands
                 await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                     $"Держи список пользователей:\n{fileContent}",
                     replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
-                Logger.Info($"!!!SPECIAL COMMAND!!! View users list success!");
+                Logger.Info("!!!SPECIAL COMMAND!!! View users list success!");
             }
             else
             {
                 await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Пользователей нет!",
                     replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
-                Logger.Info($"!!!SPECIAL COMMAND!!! Error view users list success!");
+                Logger.Info("!!!SPECIAL COMMAND!!! Error view users list success!");
             }
         }
         catch (Exception ex)
@@ -114,23 +104,25 @@ internal class GettingSpecialCommands
     {
         try
         {
-            _dateTime = DateTime.Now;
-            string month = _dateTime.Month <= 9 ? $"0{_dateTime.Month}" : $"{_dateTime.Month}";
-            string day = _dateTime.Day <= 9 ? $"0{_dateTime.Day}" : $"{_dateTime.Day}";
+            var dateTime = DateTime.Now;
+            string? logDate = default;
+            string month = dateTime.Month <= 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
+            string day = dateTime.Day <= 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
 
             if (!(message.Text! == "specialcommandforgetlogfile"))
             {
                 int index = message.Text!.IndexOf(":", StringComparison.Ordinal);
                 if (index != -1)
-                    LogDate = message.Text!.Substring(index + 1).Trim();
+                    logDate = message.Text!.Substring(index + 1).Trim();
 
-                PathOnProject = AppDomain.CurrentDomain.BaseDirectory;
-                Path = System.IO.Path.Combine(PathOnProject, $"log{System.IO.Path.DirectorySeparatorChar}{LogDate}");
+                var pathOnProject = AppDomain.CurrentDomain.BaseDirectory;
+                var path = Path.Combine(pathOnProject,
+                    $"log{Path.DirectorySeparatorChar}{logDate}");
 
-                if (System.IO.File.Exists(Path))
+                if (System.IO.File.Exists(path))
                 {
-                    await using FileStream fileStream = new FileStream(Path, FileMode.Open);
-                    InputFileStream inputFile = new InputFileStream(fileStream, LogDate);
+                    await using FileStream fileStream = new FileStream(path, FileMode.Open);
+                    InputFileStream inputFile = new InputFileStream(fileStream, logDate);
                     await botClient.SendDocumentAsync(message.Chat, inputFile,
                         caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!",
                         cancellationToken: cancellationToken);
@@ -139,7 +131,7 @@ internal class GettingSpecialCommands
                     await botClient.SendTextMessageAsync(message.Chat,
                         $"{update.Message?.From?.FirstName}, данного файла не обнаружено! Проверь корректность введенной даты!\n" +
                         $"\nПример команды на сегодня:\n" +
-                        $"```\nspecialcommandforgetlogfile:{_dateTime.Year}-{month}-{day}.log\n```",
+                        $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```",
                         parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             }
             else
@@ -147,7 +139,7 @@ internal class GettingSpecialCommands
                     $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +
                     $"\n```\nspecialcommandforgetlogfile:yyyy-MM-dd.log\n```" +
                     $"\nПример команды на сегодня:\n" +
-                    $"```\nspecialcommandforgetlogfile:{_dateTime.Year}-{month}-{day}.log\n```\n" +
+                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```\n" +
                     $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken);
 
@@ -201,6 +193,11 @@ internal class GettingSpecialCommands
         }
     }
 
+    private static readonly string? ApiKey = Configuration.GetSection("OpenAI:ChatGPTKey").Value;
+    private const string EndPoint = "https://api.openai.com/v1/chat/completions";
+    private static readonly List<GptResponse.Message> Messages = new();
+    private string? GptMessage { get; set; }
+
     public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message,
         CancellationToken cancellationToken)
     {
@@ -216,7 +213,7 @@ internal class GettingSpecialCommands
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {ApiKey}");
 
-            GptResponse.Message mes = new GptResponse.Message()
+            GptResponse.Message mes = new GptResponse.Message
             {
                 Role = "user",
                 Content = GptMessage

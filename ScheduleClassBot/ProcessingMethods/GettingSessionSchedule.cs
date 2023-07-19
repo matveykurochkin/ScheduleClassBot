@@ -8,7 +8,7 @@ internal class GettingSessionSchedule
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public async Task GetSessionOnPMI(ITelegramBotClient botClient, Update update, Message message,
+    public async Task GetSessionOnPMI(ITelegramBotClient botClient, Message message,
         CancellationToken cancellationToken)
     {
         try
@@ -36,7 +36,7 @@ internal class GettingSessionSchedule
         }
     }
 
-    public async Task GetSessionOnPRI(ITelegramBotClient botClient, Update update, Message message,
+    public async Task GetSessionOnPRI(ITelegramBotClient botClient, Message message,
         CancellationToken cancellationToken)
     {
         try
@@ -58,7 +58,7 @@ internal class GettingSessionSchedule
                                                                $"Пятница 30.06.2023 08:30 135 - 1 Койкова Т.И.\n",
                 cancellationToken: cancellationToken);
 
-            Logger.Info($"View session schedule for group PMI success!");
+            Logger.Info("View session schedule for group PMI success!");
         }
         catch (Exception ex)
         {

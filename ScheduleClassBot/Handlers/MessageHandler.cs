@@ -15,8 +15,6 @@ internal class MessageHandler
         .Build();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static readonly string ProjectPath = AppDomain.CurrentDomain.BaseDirectory;
-    private readonly long[]? _idUser = Configuration.GetSection("UserID:IdUser").Get<long[]>();
 
     private readonly GettingSessionSchedule _gettingSession = new();
     private readonly GettingSchedule _gettingSchedule = new();
@@ -24,11 +22,11 @@ internal class MessageHandler
     private readonly ReplyButtons _replyButtons = new();
     private readonly GettingSpecialCommands _gettingSpecialCommands = new();
 
-    private void UserList(string name, string surname, string username, long? id)
+    private static void SaveNewUser(string name, string surname, string username, long? id)
     {
         try
         {
-            var path = Path.Combine(ProjectPath, "ListUsers.txt");
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ListUsers.txt");
             var userInfo = $"User Info: {name} {surname} (@{username}) ID: {id}\n";
 
             if (!System.IO.File.Exists(path))
@@ -52,6 +50,7 @@ internal class MessageHandler
         }
     }
 
+    private readonly long[]? _idUser = Configuration.GetSection("UserID:IdUser").Get<long[]>();
     private bool CheckingUserId(long? userId)
     {
         return _idUser != null && _idUser.Any(x => x == userId);
@@ -77,7 +76,7 @@ internal class MessageHandler
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
-        UserList(message.From?.FirstName!, message.From?.LastName!, message.From?.Username!, message.From?.Id);
+        SaveNewUser(message.From?.FirstName!, message.From?.LastName!, message.From?.Username!, message.From?.Id);
         GettingSpecialCommands.CountMessage++;
 
         if (message.Text is not null)
@@ -142,14 +141,14 @@ internal class MessageHandler
             if (message.Text == "Расписание сессии ПМИ-120"
                 || message.Text == "/sessionpmi")
             {
-                await _gettingSession.GetSessionOnPMI(botClient, update, message, cancellationToken);
+                await _gettingSession.GetSessionOnPMI(botClient, message, cancellationToken);
                 return;
             }
 
             if (message.Text == "Расписание сессии ПРИ-121"
                 || message.Text == "/sessionpri")
             {
-                await _gettingSession.GetSessionOnPRI(botClient, update, message, cancellationToken);
+                await _gettingSession.GetSessionOnPRI(botClient, message, cancellationToken);
                 return;
             }
 

@@ -22,7 +22,7 @@ internal class BotRunService : IHostedService
     {
         try
         {
-            var handleUpdate = new MainHandler();
+            var handler = new MainHandler();
             var token = _cfg.GetSection("Tokens")["TelegramBotToken"];
             var telegramBot = new TelegramBotClient(token!);
 
@@ -33,7 +33,7 @@ internal class BotRunService : IHostedService
             var receiverOptions = new ReceiverOptions();
 
             telegramBot.StartReceiving(
-                new DefaultUpdateHandler(handleUpdate.HandleUpdateAsync, handleUpdate.HandleErrorAsync),
+                new DefaultUpdateHandler(handler.HandleUpdateAsync, handler.HandleErrorAsync),
                 receiverOptions,
                 cancellationToken
             );

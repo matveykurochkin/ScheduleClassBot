@@ -29,7 +29,7 @@ internal class GettingSpecialCommands
     private string? Path { get; set; }
     private string? LogDate { get; set; }
 
-    private readonly SpecialInlineButton _specialInlineButton = new();
+    private readonly SpecialInlineButtons _specialInlineButtons = new();
 
     public async Task BackInSpecialCommands(ITelegramBotClient botClient, Update update,
         CancellationToken cancellationToken)
@@ -40,7 +40,7 @@ internal class GettingSpecialCommands
         {
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 "Держи список специальных функций бота!",
-                replyMarkup: _specialInlineButton.SpecialCommandInlineButton(),
+                replyMarkup: _specialInlineButtons.SpecialCommandInlineButton(),
                 cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! Back success!");
@@ -73,13 +73,13 @@ internal class GettingSpecialCommands
 
                 await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                     $"Держи список пользователей:\n{fileContent}",
-                    replyMarkup: _specialInlineButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                    replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 Logger.Info($"!!!SPECIAL COMMAND!!! View users list success!");
             }
             else
             {
                 await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId, $"Пользователей нет!",
-                    replyMarkup: _specialInlineButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                    replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
                 Logger.Info($"!!!SPECIAL COMMAND!!! Error view users list success!");
             }
         }
@@ -98,7 +98,7 @@ internal class GettingSpecialCommands
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 $"Количество написанных сообщений боту: {CountMessage}!" +
                 $"\nКоличество отправленных подарков: {CountMessage / 150}!",
-                replyMarkup: _specialInlineButton.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message success!");
         }
@@ -166,7 +166,7 @@ internal class GettingSpecialCommands
         {
             await botClient.SendTextMessageAsync(message.Chat,
                 "Держи список специальных функций бота!",
-                replyMarkup: _specialInlineButton.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
+                replyMarkup: _specialInlineButtons.SpecialCommandInlineButton(), cancellationToken: cancellationToken);
             Logger.Info("!!!SPECIAL COMMAND!!! Get button with all special commands success!");
         }
         catch (Exception ex)

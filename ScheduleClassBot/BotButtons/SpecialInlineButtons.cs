@@ -2,7 +2,7 @@
 
 namespace ScheduleClassBot.BotButtons;
 
-internal class SpecialInlineButton
+internal class SpecialInlineButtons
 {
     public InlineKeyboardMarkup SpecialCommandInlineButton()
     {

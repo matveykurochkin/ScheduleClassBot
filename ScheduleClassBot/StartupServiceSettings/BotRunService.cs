@@ -40,7 +40,7 @@ internal class BotRunService : IHostedService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error message: {ex.Message}");
+            Logger.Error($"Bot not started! Error message: {ex.Message}");
         }
 
         return Task.CompletedTask;

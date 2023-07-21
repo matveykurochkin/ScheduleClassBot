@@ -4,29 +4,21 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 using ScheduleClassBot.StartupServiceSettings;
 
-namespace ScheduleClassBot;
+Logger logger = LogManager.GetCurrentClassLogger();
 
-static class Program
+try
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    using IHost host = Host.CreateDefaultBuilder()
+        .ConfigureHostConfiguration(cfgBuilder => { cfgBuilder.AddJsonFile("appsettings.json"); })
+        .ConfigureServices(
+            services => { services.AddHostedService<BotRunService>(); })
+        .UseWindowsService(options => { options.ServiceName = ".NET StockBot"; })
+        .Build();
 
-    private static async Task Main()
-    {
-        try
-        {
-            using IHost host = Host.CreateDefaultBuilder()
-                .ConfigureHostConfiguration(cfgBuilder => { cfgBuilder.AddJsonFile("appsettings.json"); })
-                .ConfigureServices(
-                    services => { services.AddHostedService<BotRunService>(); })
-                .UseWindowsService(options => { options.ServiceName = ".NET StockBot"; })
-                .Build();
-
-            await host.RunAsync();
-            Logger.Info("Stopping app success");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("Error running app. {method}: {error}", nameof(Main), ex);
-        }
-    }
+    await host.RunAsync();
+    logger.Info("Stopping app success");
+}
+catch (Exception ex)
+{
+    logger.Error("Error running app. {method}: {error}", nameof(Program), ex);
 }

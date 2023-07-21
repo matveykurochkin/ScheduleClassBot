@@ -22,12 +22,13 @@ internal class MessageHandler
     private readonly ReplyButtons _replyButtons = new();
     private readonly GettingSpecialCommands _gettingSpecialCommands = new();
 
-    private static void SaveNewUser(string name, string surname, string username, long? id)
+    private static void SaveNewUser(Message message)
     {
         try
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ListUsers.txt");
-            var userInfo = $"User Info: {name} {surname} (@{username}) ID: {id}\n";
+            var userInfo =
+                $"User Info: {message.From?.FirstName!} {message.From?.LastName!} (@{message.From?.Username!}) ID: {message.From?.Id}\n";
 
             if (!System.IO.File.Exists(path))
             {
@@ -71,12 +72,12 @@ internal class MessageHandler
             await botClient.SendTextMessageAsync(message!.Chat, "👍", cancellationToken: cancellationToken);
             return;
         }
-
+        
         if (message.Text!.StartsWith(
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
-        SaveNewUser(message.From?.FirstName!, message.From?.LastName!, message.From?.Username!, message.From?.Id);
+        SaveNewUser(message);
         GettingSpecialCommands.CountMessage++;
 
         if (message.Text is not null)

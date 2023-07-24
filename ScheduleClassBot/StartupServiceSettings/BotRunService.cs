@@ -28,23 +28,29 @@ internal class BotRunService : IHostedService
         {
             var handler = new MainHandler(_messageHandler, _callbackQueryHandler);
             var token = _configuration.BotToken;
-            var telegramBot = new TelegramBotClient(token!.TelegramBotToken!);
+            TelegramBotClient? telegramBot = default;
+            if (token is { TelegramBotToken: not null })
+                telegramBot = new TelegramBotClient(token.TelegramBotToken);
 
-            Logger.Info(
-                $"Бот {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName} успешно запущен!");
-            var cts = new CancellationTokenSource();
-            cancellationToken = cts.Token;
-            var receiverOptions = new ReceiverOptions();
+            if (telegramBot != null)
+            {
+                Logger.Info(
+                    $"Бот {telegramBot.GetMeAsync(cancellationToken).Result.FirstName} успешно запущен!");
+                var cts = new CancellationTokenSource();
+                cancellationToken = cts.Token;
+                var receiverOptions = new ReceiverOptions();
 
-            telegramBot.StartReceiving(
-                new DefaultUpdateHandler(handler.HandleUpdateAsync, handler.HandleErrorAsync),
-                receiverOptions,
-                cancellationToken
-            );
+                telegramBot.StartReceiving(
+                    new DefaultUpdateHandler(handler.HandleUpdateAsync, handler.HandleErrorAsync),
+                    receiverOptions,
+                    cancellationToken
+                );
+            }
         }
         catch (Exception ex)
         {
             Logger.Error($"Bot not started! Error message: {ex.Message}");
+            Environment.Exit(100);
         }
 
         return Task.CompletedTask;

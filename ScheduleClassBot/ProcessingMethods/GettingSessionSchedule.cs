@@ -8,8 +8,7 @@ internal class GettingSessionSchedule
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public async Task GetSessionOnPMI(ITelegramBotClient botClient, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetSessionOnPMI(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try
         {
@@ -36,8 +35,7 @@ internal class GettingSessionSchedule
         }
     }
 
-    public async Task GetSessionOnPRI(ITelegramBotClient botClient, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetSessionOnPRI(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try
         {

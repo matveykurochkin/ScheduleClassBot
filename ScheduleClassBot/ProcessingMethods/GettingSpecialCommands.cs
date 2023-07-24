@@ -3,6 +3,7 @@ using System.Text;
 using NLog;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
+using ScheduleClassBot.Interfaces;
 using ScheduleClassBot.Responses;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,21 +11,31 @@ using Telegram.Bot.Types.Enums;
 
 namespace ScheduleClassBot.ProcessingMethods;
 
-internal class GettingSpecialCommands
+internal class GettingSpecialCommands : ICheckMessage
 {
     private readonly BotSettingsConfiguration _configuration;
+
     public GettingSpecialCommands(BotSettingsConfiguration configuration)
     {
         _configuration = configuration;
     }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    internal static ulong CountMessage { get; set; }
+    internal static ulong CountMessage;
+
+    public static void IncrementCountMessage()
+    {
+        Interlocked.Increment(ref CountMessage);
+    }
+
+    public bool CheckingMessageText(string receivedText, string necessaryText)
+    {
+        return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);
+    }
 
     private readonly SpecialInlineButtons _specialInlineButtons = new();
 
-    public async Task BackInSpecialCommands(ITelegramBotClient botClient, Update update,
-        CancellationToken cancellationToken)
+    public async Task BackInSpecialCommands(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
         var chatId = callbackQuery!.Message!.Chat.Id;
@@ -100,8 +111,7 @@ internal class GettingSpecialCommands
         }
     }
 
-    public async Task GetLogFile(ITelegramBotClient botClient, Update update, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetLogFile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
         {
@@ -110,7 +120,7 @@ internal class GettingSpecialCommands
             string month = dateTime.Month <= 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
             string day = dateTime.Day <= 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
 
-            if (!(message.Text! == "specialcommandforgetlogfile"))
+            if (!CheckingMessageText(message.Text!, "specialcommandforgetlogfile"))
             {
                 int index = message.Text!.IndexOf(":", StringComparison.Ordinal);
                 if (index != -1)
@@ -191,14 +201,12 @@ internal class GettingSpecialCommands
                 nameof(GetInfoYourProfile), ex);
         }
     }
-    
+
     private const string EndPoint = "https://api.openai.com/v1/chat/completions";
     private static readonly List<GptResponse.Message> Messages = new();
-
     private string? GptMessage { get; set; }
 
-    public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         var currentMessageId = message.MessageId;
         try

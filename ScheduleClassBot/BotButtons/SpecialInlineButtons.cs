@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+﻿using ScheduleClassBot.Constants;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.BotButtons;
 
@@ -10,23 +11,19 @@ internal class SpecialInlineButtons
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Просмотр списка пользователей",
-                    callbackData: "specialcommandforviewlistusers")
+                InlineKeyboardButton.WithCallbackData(text: "Просмотр списка пользователей", callbackData: BotConstants.SpecialCommandForViewListUsers)
             },
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Просмотр количества написанных сообщений",
-                    callbackData: "specialcommandforviewcountmessages")
+                InlineKeyboardButton.WithCallbackData(text: "Просмотр количества написанных сообщений", callbackData: BotConstants.SpecialCommandForViewCountMessages)
             },
             new[]
             {
-                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов",
-                    query: "specialcommandforgetlogfile")
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов", query: BotConstants.SpecialCommandForGetLogFile)
             },
             new[]
             {
-                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Просмотр информации о пользователе",
-                    query: "specialcommandforcheckyourprofile")
+                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Просмотр информации о пользователе", query: BotConstants.SpecialCommandForCheckYourProfile)
             }
         });
         return inlineButton;
@@ -38,7 +35,7 @@ internal class SpecialInlineButtons
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Назад ⬅", callbackData: "back")
+                InlineKeyboardButton.WithCallbackData(text: BotConstants.CommandBack, callbackData: BotConstants.CommandBack)
             }
         });
         return inlineButton;

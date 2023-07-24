@@ -1,16 +1,19 @@
 ﻿using NLog;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
+using ScheduleClassBot.Constants;
+using ScheduleClassBot.Interfaces;
 using ScheduleClassBot.ProcessingMethods;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace ScheduleClassBot.Handlers;
 
-internal class MessageHandler
+internal class MessageHandler : ICheckMessage
 {
     private readonly BotSettingsConfiguration _configuration;
     private readonly GettingSpecialCommands _gettingSpecialCommands;
+
     public MessageHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands)
     {
         _configuration = configuration;
@@ -35,7 +38,9 @@ internal class MessageHandler
             if (!System.IO.File.Exists(path))
             {
                 System.IO.File.WriteAllText(path, userInfo);
-                Logger.Info("Saved First user!");
+                Logger.Info($"Saved First user!" +
+                            $"\t\nMessage Id: {message.MessageId}" +
+                            $"\t\nMore information on {path}");
             }
             else
             {
@@ -43,7 +48,9 @@ internal class MessageHandler
                 if (!fileContent.Contains(userInfo))
                 {
                     System.IO.File.AppendAllText(path, userInfo);
-                    Logger.Info("Saved new user!");
+                    Logger.Info("Saved new user!" +
+                                $"\t\nMessage Id: {message.MessageId}" +
+                                $"\t\nMore information on {path}");
                 }
             }
         }
@@ -52,13 +59,25 @@ internal class MessageHandler
             Logger.Error($"Error saved user. Error message: {ex.Message}");
         }
     }
+
     private bool CheckingUserId(long? userId)
     {
         var idUser = _configuration.UserId!.IdUser!.ToArray();
         return idUser.Any(x => x == userId);
     }
 
-    public async Task HandlerMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    public bool CheckingMessageText(string receivedText, string necessaryText)
+    {
+        return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Метод, который обрабатывает сообщения
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="cancellationToken"></param>
+    public async Task HandleMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
 
@@ -73,17 +92,17 @@ internal class MessageHandler
             await botClient.SendTextMessageAsync(message!.Chat, "👍", cancellationToken: cancellationToken);
             return;
         }
-        
+
         if (message.Text!.StartsWith(
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
         SaveNewUser(message);
-        GettingSpecialCommands.CountMessage++;
+        GettingSpecialCommands.IncrementCountMessage();
 
         if (message.Text is not null)
         {
-            if (GettingSpecialCommands.CountMessage % 50 == 0)
+            if (GettingSpecialCommands.CountMessage % BotConstants.CountMessageForPresent == 0)
             {
                 await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁" +
@@ -92,83 +111,83 @@ internal class MessageHandler
                 Logger.Info("!!!PRESENT!!! Best Stickers BusyaEveryDay!");
             }
 
-            if (message.Text == "/start"
-                || message.Text == "Назад ⬅")
+            if (CheckingMessageText(message.Text, BotConstants.CommandStart)
+                || CheckingMessageText(message.Text, BotConstants.CommandBack))
             {
                 await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, смотри мои возможности!",
                     replyMarkup: _replyButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                 await botClient.SendTextMessageAsync(message.Chat,
-                    $"Я могу показать расписание занятий таких групп: ПМИ-120 и ПРИ-121!\n\n" +
+                    $"Я могу показать расписание занятий таких групп: {BotConstants.GroupPmi} и {BotConstants.GroupPri}!\n\n" +
                     $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                     $"Доступные команды:\n" +
-                    $"/start - обновление бота\n" +
-                    $"/todaypmi - расписание на сегодня группы ПМИ-120\n" +
-                    $"/tomorrowpmi - расписание на завтра группы ПМИ-120\n" +
-                    $"/sessionpmi - расписание сессии группы ПМИ-120\n" +
-                    $"/todaypri - расписание на сегодня группы ПРИ-121\n" +
-                    $"/tomorrowpri - расписание на завтра группы ПРИ-121\n" +
-                    $"/sessionpri - расписание сессии группы ПРИ-121",
+                    $"{BotConstants.CommandStart} - обновление бота\n" +
+                    $"{BotConstants.CommandTodayPmi} - расписание на сегодня группы ПМИ-120\n" +
+                    $"{BotConstants.CommandTomorrowPmi} - расписание на завтра группы ПМИ-120\n" +
+                    $"{BotConstants.CommandSessionPmi} - расписание сессии группы ПМИ-120\n" +
+                    $"{BotConstants.CommandTodayPri} - расписание на сегодня группы ПРИ-121\n" +
+                    $"{BotConstants.CommandTomorrowPri} - расписание на завтра группы ПРИ-121\n" +
+                    $"{BotConstants.CommandSessionPri} - расписание сессии группы ПРИ-121",
                     replyMarkup: _inlineButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
                 return;
             }
 
-            if (message.Text == "ПМИ-120"
-                || message.Text == "ПРИ-121")
+            if (CheckingMessageText(message.Text, BotConstants.GroupPmi)
+                || CheckingMessageText(message.Text, BotConstants.GroupPri))
             {
                 await _gettingSchedule.GetButtonForGroup(botClient, message, update, message.Text!);
                 return;
             }
 
             if (GettingSchedule.DayOfWeekPmi.Contains(message.Text)
-                || message.Text == "Расписание на сегодня ПМИ-120"
-                || message.Text == "/todaypmi"
-                || message.Text == "Расписание на завтра ПМИ-120"
-                || message.Text == "/tomorrowpmi")
+                || CheckingMessageText(message.Text, BotConstants.ScheduleForPmiToday)
+                || CheckingMessageText(message.Text, BotConstants.CommandTodayPmi)
+                || CheckingMessageText(message.Text, BotConstants.ScheduleForPmiTomorrow)
+                || CheckingMessageText(message.Text, BotConstants.CommandTomorrowPmi))
             {
                 await _gettingSchedule.GetScheduleForGroupPMI(botClient, message, message.Text);
                 return;
             }
 
             if (GettingSchedule.DayOfWeekPri.Contains(message.Text)
-                || message.Text == "Расписание на сегодня ПРИ-121"
-                || message.Text == "/todaypri"
-                || message.Text == "Расписание на завтра ПРИ-121"
-                || message.Text == "/tomorrowpri")
+                || CheckingMessageText(message.Text, BotConstants.ScheduleForPriToday)
+                || CheckingMessageText(message.Text, BotConstants.CommandTodayPri)
+                || CheckingMessageText(message.Text, BotConstants.ScheduleForPriTomorrow)
+                || CheckingMessageText(message.Text, BotConstants.CommandTomorrowPri))
             {
                 await _gettingSchedule.GetScheduleForGroupPRI(botClient, message, message.Text);
                 return;
             }
 
-            if (message.Text == "Расписание сессии ПМИ-120"
-                || message.Text == "/sessionpmi")
+            if (CheckingMessageText(message.Text, BotConstants.CommandSessionPmi)
+                || CheckingMessageText(message.Text, BotConstants.CommandSessionPmi))
             {
                 await _gettingSession.GetSessionOnPMI(botClient, message, cancellationToken);
                 return;
             }
 
-            if (message.Text == "Расписание сессии ПРИ-121"
-                || message.Text == "/sessionpri")
+            if (CheckingMessageText(message.Text, BotConstants.CommandSessionPri)
+                || CheckingMessageText(message.Text, BotConstants.CommandSessionPri))
             {
                 await _gettingSession.GetSessionOnPRI(botClient, message, cancellationToken);
                 return;
             }
 
-            if (message.Text.StartsWith("specialcommandforviewbuttonwithlistallspecialcommands")
+            if (message.Text.StartsWith(BotConstants.SpecialCommandForViewAllSpecialCommand)
                 && CheckingUserId(message.From?.Id))
             {
                 await _gettingSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
                 return;
             }
 
-            if (message.Text.StartsWith("specialcommandforgetlogfile")
+            if (message.Text.StartsWith(BotConstants.SpecialCommandForGetLogFile)
                 && CheckingUserId(message.From?.Id))
             {
                 await _gettingSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
                 return;
             }
 
-            if (message.Text.StartsWith("specialcommandforcheckyourprofile")
+            if (message.Text.StartsWith(BotConstants.SpecialCommandForCheckYourProfile)
                 && CheckingUserId(message.From?.Id))
             {
                 await _gettingSpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);

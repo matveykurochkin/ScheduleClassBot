@@ -7,7 +7,7 @@ namespace ScheduleClassBot.Handlers;
 internal class MainHandler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    
+
     private readonly MessageHandler _messageHandler;
     private readonly CallbackQueryHandler _callbackQueryHandler;
 
@@ -16,8 +16,6 @@ internal class MainHandler
         _messageHandler = messageHandler;
         _callbackQueryHandler = callbackQueryHandler;
     }
-    
-    
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
@@ -35,11 +33,22 @@ internal class MainHandler
 
     private async Task HandleUpdateAsyncInternal(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
-            await _messageHandler.HandlerMessage(botClient, update, cancellationToken);
+        if (update.Type != Telegram.Bot.Types.Enums.UpdateType.Message
+            && update.Type != Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
+        {
+            Logger.Info("Type {0} not supported!", update.Type);
+            return;
+        }
 
-        if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
-            await _callbackQueryHandler.HandlerCallbackQuery(botClient, update, cancellationToken);
+        switch (update.Type)
+        {
+            case Telegram.Bot.Types.Enums.UpdateType.Message:
+                await _messageHandler.HandleMessage(botClient, update, cancellationToken);
+                break;
+            case Telegram.Bot.Types.Enums.UpdateType.CallbackQuery:
+                await _callbackQueryHandler.HandleCallbackQuery(botClient, update, cancellationToken);
+                break;
+        }
     }
 
     public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

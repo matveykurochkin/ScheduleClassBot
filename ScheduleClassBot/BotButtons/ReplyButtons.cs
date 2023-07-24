@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+﻿using ScheduleClassBot.Constants;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.BotButtons;
 
@@ -10,8 +11,8 @@ internal class ReplyButtons
         {
             new[]
             {
-                new KeyboardButton("ПМИ-120"),
-                new KeyboardButton("ПРИ-121")
+                new KeyboardButton(BotConstants.GroupPmi),
+                new KeyboardButton(BotConstants.GroupPri)
             }
         })
         {
@@ -26,27 +27,27 @@ internal class ReplyButtons
         {
             new[]
             {
-                new KeyboardButton($"Понедельник {nameGroup}"),
-                new KeyboardButton($"Вторник {nameGroup}")
+                new KeyboardButton($"{BotConstants.Monday} {nameGroup}"),
+                new KeyboardButton($"{BotConstants.Tuesday} {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"Среда {nameGroup}"),
-                new KeyboardButton($"Четверг {nameGroup}")
+                new KeyboardButton($"{BotConstants.Wednesday} {nameGroup}"),
+                new KeyboardButton($"{BotConstants.Thursday} {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"Пятница {nameGroup}"),
-                new KeyboardButton($"Расписание сессии {nameGroup}")
+                new KeyboardButton($"{BotConstants.Friday} {nameGroup}"),
+                new KeyboardButton($"{BotConstants.ScheduleSession} {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"Расписание на сегодня {nameGroup}"),
-                new KeyboardButton($"Расписание на завтра {nameGroup}")
+                new KeyboardButton($"{BotConstants.ScheduleToday} {nameGroup}"),
+                new KeyboardButton($"{BotConstants.ScheduleTomorrow} {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"Назад ⬅")
+                new KeyboardButton(BotConstants.CommandBack)
             }
         })
         {

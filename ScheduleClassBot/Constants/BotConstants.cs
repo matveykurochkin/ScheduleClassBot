@@ -50,6 +50,8 @@ public static class BotConstants
     public const string ScheduleForPmiTomorrow = "Расписание на завтра ПМИ-120";
     public const string ScheduleForPriToday = "Расписание на сегодня ПРИ-121";
     public const string ScheduleForPriTomorrow = "Расписание на завтра ПРИ-121";
+    public const string ScheduleSessionForPmi = "Расписание сессии ПМИ-120";
+    public const string ScheduleSessionForPri = "Расписание сессии ПРИ-121";
     public const string ScheduleToday = "Расписание на сегодня";
     public const string ScheduleTomorrow = "Расписание на завтра";
     public const string ScheduleSession = "Расписание сессии";

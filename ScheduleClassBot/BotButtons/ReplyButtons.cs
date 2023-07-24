@@ -27,17 +27,17 @@ internal class ReplyButtons
         {
             new[]
             {
-                new KeyboardButton($"{BotConstants.Monday} {nameGroup}"),
-                new KeyboardButton($"{BotConstants.Tuesday} {nameGroup}")
+                new KeyboardButton($"Понедельник {nameGroup}"),
+                new KeyboardButton($"Вторник {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"{BotConstants.Wednesday} {nameGroup}"),
-                new KeyboardButton($"{BotConstants.Thursday} {nameGroup}")
+                new KeyboardButton($"Среда {nameGroup}"),
+                new KeyboardButton($"Четверг {nameGroup}")
             },
             new[]
             {
-                new KeyboardButton($"{BotConstants.Friday} {nameGroup}"),
+                new KeyboardButton($"Пятница {nameGroup}"),
                 new KeyboardButton($"{BotConstants.ScheduleSession} {nameGroup}")
             },
             new[]

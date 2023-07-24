@@ -159,14 +159,14 @@ internal class MessageHandler : ICheckMessage
                 return;
             }
 
-            if (CheckingMessageText(message.Text, BotConstants.CommandSessionPmi)
+            if (CheckingMessageText(message.Text, BotConstants.ScheduleSessionForPmi)
                 || CheckingMessageText(message.Text, BotConstants.CommandSessionPmi))
             {
                 await _gettingSession.GetSessionOnPMI(botClient, message, cancellationToken);
                 return;
             }
 
-            if (CheckingMessageText(message.Text, BotConstants.CommandSessionPri)
+            if (CheckingMessageText(message.Text, BotConstants.ScheduleSessionForPri)
                 || CheckingMessageText(message.Text, BotConstants.CommandSessionPri))
             {
                 await _gettingSession.GetSessionOnPRI(botClient, message, cancellationToken);

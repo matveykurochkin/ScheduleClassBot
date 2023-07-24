@@ -1,4 +1,5 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+﻿using ScheduleClassBot.Constants;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.BotButtons;
 
@@ -10,8 +11,8 @@ internal class InlineButtons
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "👍🏻", callbackData: "like"),
-                InlineKeyboardButton.WithCallbackData(text: "👎🏻", callbackData: "dislike")
+                InlineKeyboardButton.WithCallbackData(text: "👍🏻", BotConstants.Like),
+                InlineKeyboardButton.WithCallbackData(text: "👎🏻", BotConstants.DisLike)
             }
         });
         return inlineButton;

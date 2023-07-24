@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using NLog;
+using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Handlers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -9,11 +9,15 @@ namespace ScheduleClassBot.StartupServiceSettings;
 
 internal class BotRunService : IHostedService
 {
-    private readonly IConfiguration _cfg;
+    private readonly BotSettingsConfiguration _configuration;
+    private readonly MessageHandler _messageHandler;
+    private readonly CallbackQueryHandler _callbackQueryHandler;
 
-    public BotRunService(IConfiguration cfg)
+    public BotRunService(BotSettingsConfiguration configuration, MessageHandler messageHandler, CallbackQueryHandler callbackQueryHandler)
     {
-        _cfg = cfg;
+        _configuration = configuration;
+        _messageHandler = messageHandler;
+        _callbackQueryHandler = callbackQueryHandler;
     }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -22,9 +26,9 @@ internal class BotRunService : IHostedService
     {
         try
         {
-            var handler = new MainHandler();
-            var token = _cfg.GetSection("Tokens")["TelegramBotToken"];
-            var telegramBot = new TelegramBotClient(token!);
+            var handler = new MainHandler(_messageHandler, _callbackQueryHandler);
+            var token = _configuration.BotToken;
+            var telegramBot = new TelegramBotClient(token!.TelegramBotToken!);
 
             Logger.Info(
                 $"Бот {telegramBot.GetMeAsync(cancellationToken: cancellationToken).Result.FirstName} успешно запущен!");

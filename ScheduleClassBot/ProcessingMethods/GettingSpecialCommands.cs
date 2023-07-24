@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using NLog;
 using ScheduleClassBot.BotButtons;
+using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Responses;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -12,10 +12,11 @@ namespace ScheduleClassBot.ProcessingMethods;
 
 internal class GettingSpecialCommands
 {
-    private static readonly IConfiguration Configuration = new ConfigurationBuilder()
-        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-        .AddJsonFile("appsettings.json")
-        .Build();
+    private readonly BotSettingsConfiguration _configuration;
+    public GettingSpecialCommands(BotSettingsConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     internal static ulong CountMessage { get; set; }
@@ -151,8 +152,7 @@ internal class GettingSpecialCommands
         }
     }
 
-    public async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try
         {
@@ -168,8 +168,7 @@ internal class GettingSpecialCommands
         }
     }
 
-    public async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message,
-        CancellationToken cancellationToken)
+    public async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
         {
@@ -192,10 +191,10 @@ internal class GettingSpecialCommands
                 nameof(GetInfoYourProfile), ex);
         }
     }
-
-    private static readonly string? ApiKey = Configuration.GetSection("OpenAI:ChatGPTKey").Value;
+    
     private const string EndPoint = "https://api.openai.com/v1/chat/completions";
     private static readonly List<GptResponse.Message> Messages = new();
+
     private string? GptMessage { get; set; }
 
     public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message,
@@ -211,7 +210,7 @@ internal class GettingSpecialCommands
             currentMessageId = firstMessage.MessageId;
 
             using var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {ApiKey}");
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration.OpenAi!.ChatGptKey}");
 
             GptResponse.Message mes = new GptResponse.Message
             {

@@ -10,13 +10,17 @@ internal class CallbackQueryHandler
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private readonly GettingSpecialCommands _gettingSpecialCommands = new();
+    private readonly GettingSpecialCommands _gettingSpecialCommands;
+
+    public CallbackQueryHandler(GettingSpecialCommands gettingSpecialCommands)
+    {
+        _gettingSpecialCommands = gettingSpecialCommands;
+    }
 
     private static ulong CountLike { get; set; }
 
 
-    public async Task HandlerCallbackQuery(ITelegramBotClient botClient, Update update,
-        CancellationToken cancellationToken)
+    public async Task HandlerCallbackQuery(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
         var chatId = callbackQuery!.Message!.Chat.Id;

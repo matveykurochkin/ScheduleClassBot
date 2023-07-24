@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using NLog;
+﻿using NLog;
 using ScheduleClassBot.BotButtons;
+using ScheduleClassBot.Configuration;
 using ScheduleClassBot.ProcessingMethods;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -9,10 +9,13 @@ namespace ScheduleClassBot.Handlers;
 
 internal class MessageHandler
 {
-    private static readonly IConfiguration Configuration = new ConfigurationBuilder()
-        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-        .AddJsonFile("appsettings.json")
-        .Build();
+    private readonly BotSettingsConfiguration _configuration;
+    private readonly GettingSpecialCommands _gettingSpecialCommands;
+    public MessageHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands)
+    {
+        _configuration = configuration;
+        _gettingSpecialCommands = gettingSpecialCommands;
+    }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -20,7 +23,6 @@ internal class MessageHandler
     private readonly GettingSchedule _gettingSchedule = new();
     private readonly InlineButtons _inlineButtons = new();
     private readonly ReplyButtons _replyButtons = new();
-    private readonly GettingSpecialCommands _gettingSpecialCommands = new();
 
     private static void SaveNewUser(Message message)
     {
@@ -50,11 +52,10 @@ internal class MessageHandler
             Logger.Error($"Error saved user. Error message: {ex.Message}");
         }
     }
-
-    private readonly long[]? _idUser = Configuration.GetSection("UserID:IdUser").Get<long[]>();
     private bool CheckingUserId(long? userId)
     {
-        return _idUser != null && _idUser.Any(x => x == userId);
+        var idUser = _configuration.UserId!.IdUser!.ToArray();
+        return idUser.Any(x => x == userId);
     }
 
     public async Task HandlerMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

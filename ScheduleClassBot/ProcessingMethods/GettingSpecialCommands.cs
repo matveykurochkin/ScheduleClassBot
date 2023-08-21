@@ -267,7 +267,7 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={message.Text![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
 
-            var client = new HttpClient();
+            using var client = new HttpClient();
 
             var response = await client.GetAsync(apiUrl, cancellationToken);
 

@@ -79,6 +79,7 @@ public static class BotConstants
     public const string SpecialCommandForCheckYourProfile = "specialcommandforcheckyourprofile";
     public const string SpecialCommandForViewListUsers = "specialcommandforviewlistusers";
     public const string SpecialCommandForViewCountMessages = "specialcommandforviewcountmessages";
+    public const string SpecialCommandForFixKeyboardLayout = "c ";
 
     #endregion
 

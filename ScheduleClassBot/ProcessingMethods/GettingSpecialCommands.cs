@@ -348,7 +348,7 @@ internal class GettingSpecialCommands : ICheckMessage
                 await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, держи конвертированный текст:\n" +
                     $"\n```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```\n" +
-                    $"Нажми чтобы скопировать!", parseMode: ParseMode.Markdown,
+                    $"\nНажми чтобы скопировать!", parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken);
                 return;
             }

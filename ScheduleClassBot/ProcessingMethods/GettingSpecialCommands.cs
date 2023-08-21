@@ -1,8 +1,10 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using NLog;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
+using ScheduleClassBot.Constants;
 using ScheduleClassBot.Interfaces;
 using ScheduleClassBot.Responses;
 using Telegram.Bot;
@@ -254,9 +256,42 @@ internal class GettingSpecialCommands : ICheckMessage
             await botClient.EditMessageTextAsync(message.Chat, currentMessageId,
                 $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!",
                 cancellationToken: cancellationToken);
-            Logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}",
-                nameof(GetAnswersFromChatGpt), ex);
+            Logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetAnswersFromChatGpt), ex);
             Messages.Clear();
+        }
+    }
+
+    public async Task GetFixKeyboardLayout(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={message.Text![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
+
+            var client = new HttpClient();
+
+            var response = await client.GetAsync(apiUrl, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                await botClient.SendTextMessageAsync(message.Chat,
+                    $"{update.Message?.From?.FirstName}, держи конвертированный текст:\n" +
+                    $"```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```" +
+                    $"Нажми чтобы скопировать!", parseMode: ParseMode.Markdown,
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            await botClient.SendTextMessageAsync(message.Chat,
+                $"{update.Message?.From?.FirstName}, произошла ошибка конвертирования:" +
+                $"\nstatus code: {response.StatusCode}," +
+                $"\nerror message: {response.Content}",
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("!!!SPECIAL COMMAND!!! Error Fix Keyboard Layout. {method}: {error}", nameof(GetFixKeyboardLayout), ex);
         }
     }
 }

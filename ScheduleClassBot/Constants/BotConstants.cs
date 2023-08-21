@@ -1,5 +1,10 @@
 ﻿namespace ScheduleClassBot.Constants;
 
+/// <summary>
+/// Класс, представляющий необходимые для работы бота константы,
+/// сделано с целью удобства изменения повторяющегося кода,
+/// класс разделен на отдельные директивы #region и #endregion, каждая из которых имеет название группы, которую они представляют
+/// </summary>
 public static class BotConstants
 {
     #region Day Of Week all group

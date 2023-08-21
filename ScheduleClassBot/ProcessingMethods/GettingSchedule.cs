@@ -13,25 +13,46 @@ internal class GettingSchedule : ICheckMessage
 
     private string? _addedToResponseText;
 
+    /// <summary>
+    /// массив, содержащий дни недели для группы ПМИ, пример: "Среда ПМИ-120"
+    /// </summary>
     internal static readonly string[] DayOfWeekPmi =
         { BotConstants.MondayPmi, BotConstants.TuesdayPmi, BotConstants.WednesdayPmi, BotConstants.ThursdayPmi, BotConstants.FridayPmi };
 
+    /// <summary>
+    /// массив, содержащий дни недели для группы ПРИ, пример: "Среда ПРИ-121"
+    /// </summary>
     internal static readonly string[] DayOfWeekPri =
         { BotConstants.MondayPri, BotConstants.TuesdayPri, BotConstants.WednesdayPri, BotConstants.ThursdayPri, BotConstants.FridayPri };
 
+    /// <summary>
+    /// массив, содержащий дни недели 
+    /// </summary>
     private static readonly string[] DayOfWeek =
         { BotConstants.Monday, BotConstants.Tuesday, BotConstants.Wednesday, BotConstants.Thursday, BotConstants.Friday };
 
+    /// <summary>
+    /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
+    /// </summary>
+    /// <param name="receivedText">полученный на вход текст</param>
+    /// <param name="necessaryText">необходимый текст</param>
+    /// <returns>true, если полученный на вход текст = необходимому тексу, false - во всех остальных случаях</returns>
     public bool CheckingMessageText(string receivedText, string necessaryText)
     {
         return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);
     }
 
-    private string GetTodaySchedule(string[] dayArr, DayOfWeek today)
+    /// <summary>
+    /// Метод, который получает сегодняшний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri
+    /// </summary>
+    /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
+    /// <param name="today">сегодняшний день</param>
+    /// <returns>возвращает сегодняшний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
+    private string GetTodaySchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 
-        if (todayIndex >= dayArr.Length)
+        if (todayIndex >= dayArr.Count)
         {
             _addedToResponseText += BotConstants.WeekendsToday;
             return dayArr[0];
@@ -40,7 +61,13 @@ internal class GettingSchedule : ICheckMessage
         return dayArr[todayIndex];
     }
 
-    private string GetTomorrowSchedule(string[] dayArr, DayOfWeek today)
+    /// <summary>
+    /// Метод, который получает завтрашний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri
+    /// </summary>
+    /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
+    /// <param name="today">завтрашний день</param>
+    /// <returns>возвращает завтрашний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
+    private string GetTomorrowSchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 
@@ -58,6 +85,14 @@ internal class GettingSchedule : ICheckMessage
         return dayArr[todayIndex + 1];
     }
 
+    /// <summary>
+    /// Метод, который после выбора группы пользователем, вызывает метод AllGroup, который составляет сетку
+    /// возможных вариантов запроса расписания для указанной группы
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="update"></param>
+    /// <param name="nameGroup">название группы, для которой необходимо составить сетку</param>
     internal async Task GetButtonForGroup(ITelegramBotClient botClient, Message message, Update update, string nameGroup)
     {
         try
@@ -73,6 +108,12 @@ internal class GettingSchedule : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Главный метод, который обрабатывет все возможные варианты из сетки запросов расписания, работает для группы ПМИ-120
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="textMessage">полученное сообщение от пользователя</param>
     // ReSharper disable once InconsistentNaming
     internal async Task GetScheduleForGroupPMI(ITelegramBotClient botClient, Message message, string textMessage)
     {
@@ -153,7 +194,13 @@ internal class GettingSchedule : ICheckMessage
             Logger.Error("Error view schedule for group PMI. {method}: {error}", nameof(GetScheduleForGroupPMI), ex);
         }
     }
-
+    
+    /// <summary>
+    /// Главный метод, который обрабатывет все возможные варианты из сетки запросов расписания, работает для группы ПРИ-121
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="textMessage">полученное сообщение от пользователя</param>
     // ReSharper disable once InconsistentNaming
     internal async Task GetScheduleForGroupPRI(ITelegramBotClient botClient, Message message, string textMessage)
     {

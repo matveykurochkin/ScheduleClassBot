@@ -8,6 +8,12 @@ internal class GettingSessionSchedule
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Метод, показывающий расписание сессии группы ПМИ-120
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetSessionOnPMI(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try
@@ -35,6 +41,12 @@ internal class GettingSessionSchedule
         }
     }
 
+    /// <summary>
+    /// Метод, показывающий расписание сессии группы ПРИ-121
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetSessionOnPRI(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try

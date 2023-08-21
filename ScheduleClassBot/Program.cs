@@ -9,6 +9,7 @@ using ScheduleClassBot.StartupServiceSettings;
 
 Logger logger = LogManager.GetCurrentClassLogger();
 
+// Осуществление запуска бота как службы или как приложения
 try
 {
     using IHost host = Host.CreateDefaultBuilder()

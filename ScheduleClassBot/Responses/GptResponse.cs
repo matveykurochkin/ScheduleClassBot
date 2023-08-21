@@ -2,6 +2,9 @@
 
 namespace ScheduleClassBot.Responses;
 
+/// <summary>
+/// Класс, описывающий структура ответа от Chat GPT 
+/// </summary>
 internal abstract class GptResponse
 {
    public class Message

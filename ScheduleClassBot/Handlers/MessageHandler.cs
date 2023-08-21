@@ -27,6 +27,11 @@ internal class MessageHandler : ICheckMessage
     private readonly InlineButtons _inlineButtons = new();
     private readonly ReplyButtons _replyButtons = new();
 
+    /// <summary>
+    /// Метод, сохраняющий новых пользователей, на вход получает сообщение, так как из сообщения можно получить
+    /// необходимую информацию о том, кто его отправил, если пользователь новый происходит сохранение, если старый - ничего не происходит
+    /// </summary>
+    /// <param name="message">сообщение текущего пользователя</param>
     private static void SaveNewUser(Message message)
     {
         try
@@ -60,12 +65,25 @@ internal class MessageHandler : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, проверяющий есть ли в файле конфигурации id пользователя который отправл сообщение,
+    /// если есть то бот открывает доступ пользователю к специальным командам, если нет отвечает, что не знает как ответить на сообщение,
+    /// если пользователь воодит специальную команду
+    /// </summary>
+    /// <param name="userId">id пользователя</param>
+    /// <returns>true, если id текущего пользователя есть в файле конфигурации, false - во всех остальных случаях</returns>
     private bool CheckingUserId(long? userId)
     {
         var idUser = _configuration.UserId!.IdUser!.ToArray();
         return idUser.Any(x => x == userId);
     }
 
+    /// <summary>
+    /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
+    /// </summary>
+    /// <param name="receivedText">полученный на вход текст</param>
+    /// <param name="necessaryText">необходимый текст</param>
+    /// <returns>true, если полученный на вход текст = необходимому тексу, false - во всех остальных случаях</returns>
     public bool CheckingMessageText(string receivedText, string necessaryText)
     {
         return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);
@@ -80,6 +98,7 @@ internal class MessageHandler : ICheckMessage
     public async Task HandleMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
+        GettingSpecialCommands.LastUser = $"@{message?.From?.Username}";
 
         Logger.Info(
             $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!" +

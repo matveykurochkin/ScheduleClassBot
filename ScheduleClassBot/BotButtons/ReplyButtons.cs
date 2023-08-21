@@ -5,6 +5,10 @@ namespace ScheduleClassBot.BotButtons;
 
 internal class ReplyButtons
 {
+    /// <summary>
+    /// Метод, отвечающий за кнопки доступных для просмотра расписания групп
+    /// </summary>
+    /// <returns></returns>
     public IReplyMarkup MainButtonOnBot()
     {
         var tgButton = new ReplyKeyboardMarkup(new[]
@@ -21,6 +25,11 @@ internal class ReplyButtons
         return tgButton;
     }
 
+    /// <summary>
+    /// Метод, составляющий сетку расписания для запращиваемой группы
+    /// </summary>
+    /// <param name="nameGroup">название группы для которой требуется создать сетку возможных вариантов просмотра расписания</param>
+    /// <returns></returns>
     public IReplyMarkup AllGroup(string nameGroup)
     {
         var tgButton = new ReplyKeyboardMarkup(new[]

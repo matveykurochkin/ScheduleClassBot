@@ -22,6 +22,11 @@ internal class BotRunService : IHostedService
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Метод, предоставляющий настройки для запуска бота
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task StartAsync(CancellationToken cancellationToken)
     {
         try
@@ -56,6 +61,11 @@ internal class BotRunService : IHostedService
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Метод, предоставляющий настройки для остановки бота
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
         Logger.Info("Service stopping");

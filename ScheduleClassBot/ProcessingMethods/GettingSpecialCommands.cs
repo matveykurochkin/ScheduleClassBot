@@ -23,13 +23,23 @@ internal class GettingSpecialCommands : ICheckMessage
     }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    
     internal static ulong CountMessage;
-
+    
+    /// <summary>
+    /// Метод, который безопасно в многопоточной среде считает количество сообщений отправленных боту
+    /// </summary>
     public static void IncrementCountMessage()
     {
         Interlocked.Increment(ref CountMessage);
     }
 
+    /// <summary>
+    /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
+    /// </summary>
+    /// <param name="receivedText">полученный на вход текст</param>
+    /// <param name="necessaryText">необходимый текст</param>
+    /// <returns>true, если полученный на вход текст = необходимому тексу, false - во всех остальных случаях</returns>
     public bool CheckingMessageText(string receivedText, string necessaryText)
     {
         return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);
@@ -37,6 +47,13 @@ internal class GettingSpecialCommands : ICheckMessage
 
     private readonly SpecialInlineButtons _specialInlineButtons = new();
 
+    /// <summary>
+    /// Метод который возвращается назад к списку доступных команд с помощью метода SpecialCommandInlineButton
+    /// (доступен огранниченному количеству пользователей)
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="cancellationToken"></param>
     public async Task BackInSpecialCommands(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
@@ -56,6 +73,12 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, позволяющий получить список пользователей, пользовавщихся ботом
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetUsersList(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
@@ -93,6 +116,15 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    internal static string? LastUser { get; set; }
+
+    /// <summary>
+    /// Метод, позволяющий получить количество отправленных ботом подарков,
+    /// количество написанных сообщений, и юзернейм последнего написавшего человека боту
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetCountMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var callbackQuery = update.CallbackQuery;
@@ -101,7 +133,8 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 $"Количество написанных сообщений боту: {CountMessage}!" +
-                $"\nКоличество отправленных подарков: {CountMessage / 150}!",
+                $"\nКоличество отправленных подарков: {CountMessage / 150}!" +
+                $"\nПоследний написавший человек боту: {LastUser}!",
                 replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message success!");
@@ -113,6 +146,13 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, позволяющий получить файлы ведения журнала ботом
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetLogFile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
@@ -164,6 +204,12 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, позволяющий получить меню со списком специальных команд бота
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetButtonWithSpecialCommands(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
         try
@@ -180,6 +226,13 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, позволяющий получить информацию о текущем пользователе
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
@@ -208,6 +261,13 @@ internal class GettingSpecialCommands : ICheckMessage
     private static readonly List<GptResponse.Message> Messages = new();
     private string? GptMessage { get; set; }
 
+    /// <summary>
+    /// Метод, обрабатывающий запрос адресованный Chat GPT и отправляет пользователю ответ
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         var currentMessageId = message.MessageId;
@@ -261,23 +321,33 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, позволяющий конвертировать ошибочное написание текста на английском/русском языке
+    /// пример: ghbdtn -> привет, рш -> hi
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="message"></param>
+    /// <param name="cancellationToken"></param>
     public async Task GetFixKeyboardLayout(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
     {
         try
         {
+            //Обращение к API Layout Keyboard Converting Service
             var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={message.Text![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
 
             using var client = new HttpClient();
-
             var response = await client.GetAsync(apiUrl, cancellationToken);
 
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
+                Logger.Info("!!!SPECIAL COMMAND!!! Method {method} complite success!", nameof(GetFixKeyboardLayout));
+                
                 await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, держи конвертированный текст:\n" +
-                    $"```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```" +
+                    $"\n```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```\n" +
                     $"Нажми чтобы скопировать!", parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken);
                 return;

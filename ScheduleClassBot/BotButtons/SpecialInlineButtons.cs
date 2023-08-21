@@ -5,6 +5,10 @@ namespace ScheduleClassBot.BotButtons;
 
 internal class SpecialInlineButtons
 {
+    /// <summary>
+    /// Метод, показывающий кнопки специальных команд доступен только для пользователей у которых есть к ним доступ
+    /// </summary>
+    /// <returns></returns>
     public InlineKeyboardMarkup SpecialCommandInlineButton()
     {
         var inlineButton = new InlineKeyboardMarkup(new[]
@@ -29,6 +33,11 @@ internal class SpecialInlineButtons
         return inlineButton;
     }
 
+    /// <summary>
+    /// Метод, отвечающий за возвращение к методу SpecialCommandInlineButton при нажатии на такие кнопки:
+    /// "Просмотр списка пользователей" и "Просмотр количества написанных сообщений"
+    /// </summary>
+    /// <returns></returns>
     public InlineKeyboardMarkup SpecialBackInlineButton()
     {
         var inlineButton = new InlineKeyboardMarkup(new[]

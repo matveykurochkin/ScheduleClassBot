@@ -21,6 +21,12 @@ internal class CallbackQueryHandler : ICheckMessage
 
     private static ulong CountLike { get; set; }
 
+    /// <summary>
+    /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
+    /// </summary>
+    /// <param name="receivedText">полученный на вход текст</param>
+    /// <param name="necessaryText">необходимый текст</param>
+    /// <returns>true, если полученный на вход текст = необходимому тексу, false - во всех остальных случаях</returns>
     public bool CheckingMessageText(string receivedText, string necessaryText)
     {
         return string.Equals(receivedText, necessaryText, StringComparison.OrdinalIgnoreCase);

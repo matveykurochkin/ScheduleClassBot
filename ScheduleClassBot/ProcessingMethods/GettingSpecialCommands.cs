@@ -134,7 +134,7 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 $"Количество написанных сообщений боту: {CountMessage}!" +
-                $"\nКоличество отправленных подарков: {CountMessage / 150}!" +
+                $"\nКоличество отправленных подарков: {CountMessage / BotConstants.CountMessageForPresent}!" +
                 $"\nПоследний написавший человек боту: {LastUser}!",
                 replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 

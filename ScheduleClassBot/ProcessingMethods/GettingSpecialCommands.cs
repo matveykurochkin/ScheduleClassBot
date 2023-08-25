@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using NLog;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
@@ -23,9 +24,9 @@ internal class GettingSpecialCommands : ICheckMessage
     }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    
+
     internal static ulong CountMessage;
-    
+
     /// <summary>
     /// Метод, который безопасно в многопоточной среде считает количество сообщений отправленных боту
     /// </summary>
@@ -333,8 +334,11 @@ internal class GettingSpecialCommands : ICheckMessage
     {
         try
         {
+            // Для того чтобы передать символ & в запросе, его необходимо экранировать с помощью кода %26 (если запрос содержит символ &)
+            var messageToFix = HttpUtility.UrlEncode(message.Text);
+            
             //Обращение к API Layout Keyboard Converting Service
-            var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={message.Text![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
+            var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={messageToFix![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
 
             using var client = new HttpClient();
             var response = await client.GetAsync(apiUrl, cancellationToken);

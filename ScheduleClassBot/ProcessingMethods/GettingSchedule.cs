@@ -29,7 +29,7 @@ internal class GettingSchedule : ICheckMessage
     /// массив, содержащий дни недели 
     /// </summary>
     private static readonly string[] DayOfWeek =
-        { BotConstants.Monday, BotConstants.Tuesday, BotConstants.Wednesday, BotConstants.Thursday, BotConstants.Friday };
+        { BotConstants.Monday, BotConstants.Tuesday, BotConstants.Wednesday, BotConstants.Thursday, BotConstants.Friday, BotConstants.Saturday, BotConstants.Sunday };
 
     /// <summary>
     /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
@@ -48,11 +48,11 @@ internal class GettingSchedule : ICheckMessage
     /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
     /// <param name="today">сегодняшний день</param>
     /// <returns>возвращает сегодняшний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
-    private string GetTodaySchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
+    private string GetTodaySchedule(string[] dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 
-        if (todayIndex >= dayArr.Count)
+        if (todayIndex >= dayArr.Length)
         {
             _addedToResponseText += BotConstants.WeekendsToday;
             return dayArr[0];
@@ -67,7 +67,7 @@ internal class GettingSchedule : ICheckMessage
     /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
     /// <param name="today">завтрашний день</param>
     /// <returns>возвращает завтрашний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
-    private string GetTomorrowSchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
+    private string GetTomorrowSchedule(string[] dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 

@@ -48,17 +48,14 @@ internal class GettingSchedule : ICheckMessage
     /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
     /// <param name="today">сегодняшний день</param>
     /// <returns>возвращает сегодняшний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
-    private string GetTodaySchedule(string[] dayArr, DayOfWeek today)
+    private string GetTodaySchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 
-        if (todayIndex >= dayArr.Length)
-        {
-            _addedToResponseText += BotConstants.WeekendsToday;
-            return dayArr[0];
-        }
+        if (todayIndex < dayArr.Count) return dayArr[todayIndex];
+        _addedToResponseText += BotConstants.WeekendsToday;
+        return dayArr[0];
 
-        return dayArr[todayIndex];
     }
 
     /// <summary>
@@ -67,22 +64,21 @@ internal class GettingSchedule : ICheckMessage
     /// <param name="dayArr">один из массивов DayOfWeekPmi или DayOfWeekPri</param>
     /// <param name="today">завтрашний день</param>
     /// <returns>возвращает завтрашний день недели для переданного массива DayOfWeekPmi или DayOfWeekPri</returns>
-    private string GetTomorrowSchedule(string[] dayArr, DayOfWeek today)
+    private string GetTomorrowSchedule(IReadOnlyList<string> dayArr, DayOfWeek today)
     {
         var todayIndex = Array.IndexOf(DayOfWeek, today.ToString());
 
-        if (todayIndex == 4 || todayIndex == 5)
+        switch (todayIndex)
         {
-            _addedToResponseText += BotConstants.WeekendsTomorrow;
-            return dayArr[0];
+            case 4:
+            case 5:
+                _addedToResponseText += BotConstants.WeekendsTomorrow;
+                return dayArr[0];
+            case 6:
+                return dayArr[0];
+            default:
+                return dayArr[todayIndex + 1];
         }
-
-        if (todayIndex == 6)
-        {
-            return dayArr[0];
-        }
-
-        return dayArr[todayIndex + 1];
     }
 
     /// <summary>
@@ -149,10 +145,10 @@ internal class GettingSchedule : ICheckMessage
                         await botClient.SendTextMessageAsync(message.Chat,
                             $"{_addedToResponseText}📌Расписание на Вторник (Числитель)\n" +
                             $"2⃣ пара 10:20 - 11:50\nСовременный русский язык пр 424-3\nТрошина Н.Н.\n" +
-                            $"3⃣ пара 12:10 - 13:40\nТеория эксперимента пр 511г-3\nБутковский О.Я.\n\n" +
+                            $"3⃣ пара 12:10 - 13:40\nИмитационное моделирование лб 511г-3\nХмельницкая Е.В.\n\n" +
                             $"📌Расписание на Вторник (Знаменатель)\n" +
-                            $"1⃣ пара 08:30 - 10:00\nИмитационное моделирование лк 420-3\nАбрахин С.И.\n" +
-                            $"2⃣ пара 10:20 - 11:50\nСовременный русский язык пр 424-3\nТрошина Н.Н.");
+                            $"2⃣ пара 10:20 - 11:50\nСовременный русский язык пр 424-3\nТрошина Н.Н.\n" +
+                            $"3⃣ пара 12:10 - 13:40\nИмитационное моделирование лб 511г-3\nХмельницкая Е.В.");
                         break;
                     case BotConstants.WednesdayPmi:
                         await botClient.SendTextMessageAsync(message.Chat,
@@ -176,7 +172,7 @@ internal class GettingSchedule : ICheckMessage
                     case BotConstants.FridayPmi:
                         await botClient.SendTextMessageAsync(message.Chat,
                             $"{_addedToResponseText}📌Расписание на Пятницу (Числитель)\n" +
-                            $"2⃣ пара 10:20 - 11:50\nИмитационное моделирование лб 423-2\nАбрахин С.И.\n" +
+                            $"2⃣ пара 10:20 - 11:50\nТеория эксперимента пр 423-2\nБолачков А.В.\n" +
                             $"3⃣ пара 12:10 - 13:40\nПараллельное программирование и основы суперкомпьютерных технологий лк В-3\nГолубев А.С.\n\n" +
                             $"📌Расписание на Пятницу (Знаменатель)\n" +
                             $"3⃣ пара 12:10 - 13:40\nПараллельное программирование и основы суперкомпьютерных технологий лк В-3\nГолубев А.С.\n" +

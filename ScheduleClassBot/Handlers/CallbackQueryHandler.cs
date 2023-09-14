@@ -57,6 +57,7 @@ internal class CallbackQueryHandler : ICheckMessage
                 });
                 await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
                     cancellationToken: cancellationToken);
+                Logger.Info("!!!SPECIAL COMMAND!!! The like button is pressed by the user!");
                 return;
             }
 
@@ -75,6 +76,7 @@ internal class CallbackQueryHandler : ICheckMessage
                     showAlert: true, cancellationToken: cancellationToken);
                 await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
                     cancellationToken: cancellationToken);
+                Logger.Info("!!!SPECIAL COMMAND!!! The dislike button is pressed by the user!");
                 return;
             }
 

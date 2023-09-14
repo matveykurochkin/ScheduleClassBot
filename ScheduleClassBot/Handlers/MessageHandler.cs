@@ -98,17 +98,17 @@ internal class MessageHandler : ICheckMessage
     public async Task HandleMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
-        GettingSpecialCommands.LastUser = $"@{message?.From?.Username}";
+        GettingSpecialCommands.LastUser = $"\nName: {message!.From?.FirstName}\nSurname: {message.From?.LastName}\nUsername: @{message.From?.Username}";
 
         Logger.Info(
-            $"Пользователь || {message?.From?.FirstName} {message?.From?.LastName} || написал сообщение боту!" +
-            $"\n\tТекст сообщения: {message?.Text}" +
-            $"\n\tID Пользователя: {message?.From?.Id}" +
-            $"\n\tUsername: @{message?.From?.Username}");
+            $"Пользователь || {message.From?.FirstName} {message.From?.LastName} || написал сообщение боту!" +
+            $"\n\tТекст сообщения: {message.Text}" +
+            $"\n\tID Пользователя: {message.From?.Id}" +
+            $"\n\tUsername: @{message.From?.Username}");
 
-        if (message?.Text is null)
+        if (message.Text is null)
         {
-            await botClient.SendTextMessageAsync(message!.Chat, "👍", cancellationToken: cancellationToken);
+            await botClient.SendTextMessageAsync(message.Chat, "👍", cancellationToken: cancellationToken);
             return;
         }
 

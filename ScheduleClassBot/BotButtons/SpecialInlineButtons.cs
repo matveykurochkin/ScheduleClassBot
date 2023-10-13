@@ -24,10 +24,6 @@ internal class SpecialInlineButtons
             new[]
             {
                 InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов", query: BotConstants.SpecialCommandForGetLogFile)
-            },
-            new[]
-            {
-                InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Просмотр информации о пользователе", query: BotConstants.SpecialCommandForCheckYourProfile)
             }
         });
         return inlineButton;

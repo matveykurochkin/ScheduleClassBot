@@ -99,13 +99,6 @@ internal class CallbackQueryHandler : ICheckMessage
                 return;
             }
 
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForCheckYourProfile))
-            {
-                await botClient.SendTextMessageAsync(chatId, BotConstants.SpecialCommandForCheckYourProfile,
-                    cancellationToken: cancellationToken);
-                return;
-            }
-
             if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.CommandBack))
             {
                 await _gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);

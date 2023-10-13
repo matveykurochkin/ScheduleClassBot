@@ -7,12 +7,12 @@ using ScheduleClassBot.Handlers;
 using ScheduleClassBot.ProcessingMethods;
 using ScheduleClassBot.StartupServiceSettings;
 
-Logger logger = LogManager.GetCurrentClassLogger();
+var logger = LogManager.GetCurrentClassLogger();
 
 // Осуществление запуска бота как службы или как приложения
 try
 {
-    using IHost host = Host.CreateDefaultBuilder()
+    using var host = Host.CreateDefaultBuilder()
         .ConfigureHostConfiguration(cfgBuilder => { cfgBuilder.AddJsonFile("appsettings.json"); })
         .ConfigureServices(
             (hostContext, services) =>

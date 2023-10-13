@@ -1,4 +1,5 @@
 ﻿using NLog;
+using Npgsql;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Constants;
@@ -28,11 +29,74 @@ internal class MessageHandler : ICheckMessage
     private readonly ReplyButtons _replyButtons = new();
 
     /// <summary>
+    /// Метод, сохраняющий id пользователя, его сообщение и id сообщения в базу данных
+    /// </summary>
+    /// <param name="message"></param>
+    private void SaveMessageForDb(Message message)
+    {
+        try
+        {
+            const string insertMessage = "INSERT INTO messages (USERID, TEXT, ID)" +
+                                         "VALUES (@userid, @text, @id);";
+
+            using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            using var command = new NpgsqlCommand(insertMessage, connection);
+
+            command.Parameters.AddWithValue("@userid", message.From?.Id!);
+            command.Parameters.AddWithValue("@text", message.Text!);
+            command.Parameters.AddWithValue("@id", message.MessageId);
+
+            connection.Open();
+            var rowsAffected = command.ExecuteNonQuery();
+            Logger.Info(rowsAffected > 0
+                ? "Information about the message has been successfully saved to the database"
+                : "Information about the message is not saved to the database");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error Save Message For Db. Error message: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Метод, сохраняющий данные пользователя, в базу данных, если они там уже есть, то они обновляются
+    /// </summary>
+    /// <param name="message"></param>
+    private void SaveUserForDb(Message message)
+    {
+        try
+        {
+            const string insertNewPeople = "INSERT INTO botusers (id, name, surname, username) " +
+                                           "VALUES (@id, @name, @surname, @username) " +
+                                           "ON CONFLICT (id) DO UPDATE " +
+                                           "SET name = EXCLUDED.name, surname = EXCLUDED.surname, username = EXCLUDED.username;";
+
+            using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            using var command = new NpgsqlCommand(insertNewPeople, connection);
+
+            command.Parameters.AddWithValue("@id", message.From?.Id!);
+            command.Parameters.AddWithValue("@name", message.From?.FirstName! == null ? "" : message.From?.FirstName!);
+            command.Parameters.AddWithValue("@surname", message.From?.LastName! == null ? "" : message.From?.LastName!);
+            command.Parameters.AddWithValue("@username", $"@{message.From?.Username!}");
+
+            connection.Open();
+            var rowsAffected = command.ExecuteNonQuery();
+            Logger.Info(rowsAffected > 0
+                ? "A person has been successfully added to the database or his data has been updated"
+                : "An error occurred when adding a person to the database");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error saved user for db. Error message: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// Метод, сохраняющий новых пользователей, на вход получает сообщение, так как из сообщения можно получить
     /// необходимую информацию о том, кто его отправил, если пользователь новый происходит сохранение, если старый - ничего не происходит
     /// </summary>
     /// <param name="message">сообщение текущего пользователя</param>
-    private static void SaveNewUser(Message message)
+    private void SaveNewUser(Message message)
     {
         try
         {
@@ -50,13 +114,11 @@ internal class MessageHandler : ICheckMessage
             else
             {
                 var fileContent = System.IO.File.ReadAllText(path);
-                if (!fileContent.Contains(userInfo))
-                {
-                    System.IO.File.AppendAllText(path, userInfo);
-                    Logger.Info("Saved new user!" +
-                                $"\t\nMessage Id: {message.MessageId}" +
-                                $"\t\nMore information on {path}");
-                }
+                if (fileContent.Contains(userInfo)) return;
+                System.IO.File.AppendAllText(path, userInfo);
+                Logger.Info("Saved new user!" +
+                            $"\t\nMessage Id: {message.MessageId}" +
+                            $"\t\nMore information on {path}");
             }
         }
         catch (Exception ex)
@@ -90,6 +152,21 @@ internal class MessageHandler : ICheckMessage
     }
 
     /// <summary>
+    /// Метод, который отправляет ссылку на стикеры, каждые n раз
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="update"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task PresentStickers(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        await botClient.SendTextMessageAsync(update.Message!.Chat,
+            $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁" +
+            $"\nhttps://t.me/addstickers/BusyaEveryDay",
+            cancellationToken: cancellationToken);
+        Logger.Info("!!!PRESENT!!! Best Stickers BusyaEveryDay!");
+    }
+
+    /// <summary>
     /// Метод, который обрабатывает сообщения
     /// </summary>
     /// <param name="botClient"></param>
@@ -98,13 +175,29 @@ internal class MessageHandler : ICheckMessage
     public async Task HandleMessage(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         var message = update.Message;
-        GettingSpecialCommands.LastUser = $"\nName: {message!.From?.FirstName}\nSurname: {message.From?.LastName}\nUsername: @{message.From?.Username}";
 
         Logger.Info(
-            $"Пользователь || {message.From?.FirstName} {message.From?.LastName} || написал сообщение боту!" +
+            $"Пользователь || {message!.From?.FirstName} {message.From?.LastName} || написал сообщение боту!" +
             $"\n\tТекст сообщения: {message.Text}" +
             $"\n\tID Пользователя: {message.From?.Id}" +
             $"\n\tUsername: @{message.From?.Username}");
+
+        if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+        {
+            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await connection.OpenAsync(cancellationToken);
+
+            const string countMessagesFromDb = "SELECT Count(*) FROM messages;";
+
+            SaveUserForDb(message);
+            SaveMessageForDb(message);
+
+            await using var commandCountMessages = new NpgsqlCommand(countMessagesFromDb, connection);
+            var countMessage = (long)(await commandCountMessages.ExecuteScalarAsync(cancellationToken))!;
+
+            if (countMessage > 0 && countMessage % BotConstants.CountMessageForPresent == 0)
+                await PresentStickers(botClient, update, cancellationToken);
+        }
 
         if (message.Text is null)
         {
@@ -116,20 +209,17 @@ internal class MessageHandler : ICheckMessage
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
-        SaveNewUser(message);
-        GettingSpecialCommands.IncrementCountMessage();
+
+        if (!_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+        {
+            SaveNewUser(message);
+            GettingSpecialCommands.IncrementCountMessage();
+            if (GettingSpecialCommands.CountMessage > 0 && GettingSpecialCommands.CountMessage % BotConstants.CountMessageForPresent == 0)
+                await PresentStickers(botClient, update, cancellationToken);
+        }
 
         if (message.Text is not null)
         {
-            if (GettingSpecialCommands.CountMessage % BotConstants.CountMessageForPresent == 0)
-            {
-                await botClient.SendTextMessageAsync(message.Chat,
-                    $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁" +
-                    $"\nhttps://t.me/addstickers/BusyaEveryDay",
-                    cancellationToken: cancellationToken);
-                Logger.Info("!!!PRESENT!!! Best Stickers BusyaEveryDay!");
-            }
-
             if (CheckingMessageText(message.Text, BotConstants.CommandStart)
                 || CheckingMessageText(message.Text, BotConstants.CommandBack))
             {
@@ -203,13 +293,6 @@ internal class MessageHandler : ICheckMessage
                 && CheckingUserId(message.From?.Id))
             {
                 await _gettingSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
-                return;
-            }
-
-            if (message.Text.StartsWith(BotConstants.SpecialCommandForCheckYourProfile)
-                && CheckingUserId(message.From?.Id))
-            {
-                await _gettingSpecialCommands.GetInfoYourProfile(botClient, update, message, cancellationToken);
                 return;
             }
 

@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using NLog;
+using Npgsql;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Constants;
@@ -25,7 +26,7 @@ internal class GettingSpecialCommands : ICheckMessage
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    internal static ulong CountMessage;
+    internal static long CountMessage;
 
     /// <summary>
     /// Метод, который безопасно в многопоточной среде считает количество сообщений отправленных боту
@@ -70,12 +71,47 @@ internal class GettingSpecialCommands : ICheckMessage
         }
         catch (Exception ex)
         {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error back. {method}: {error}", nameof(GetCountMessage), ex);
+            Logger.Error("!!!SPECIAL COMMAND!!! Error back. {method}: {error}", nameof(BackInSpecialCommands), ex);
+        }
+    }
+
+    /// <summary>
+    /// Метод, который получает список всех, кто пользовался ботом из базы данных 
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="callbackQuery"></param>
+    /// <param name="chatId"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task GetUsersListFromDb(ITelegramBotClient botClient, CallbackQuery callbackQuery, long chatId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await connection.OpenAsync(cancellationToken);
+
+            const string selectFromBotUsers = "SELECT * FROM botusers";
+
+            await using var command = new NpgsqlCommand(selectFromBotUsers, connection);
+            await using var reader = command.ExecuteReader();
+
+            var listOfBotUsers = string.Empty;
+            while (await reader.ReadAsync(cancellationToken))
+                listOfBotUsers += $"{reader["name"]} {reader["surname"]} ({reader["username"]}) ID: {reader["id"]}" + Environment.NewLine;
+
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
+                $"Держи список пользователей:\n{listOfBotUsers}",
+                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+            Logger.Info("!!!SPECIAL COMMAND!!! View users list success from DB!");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("!!!SPECIAL COMMAND!!! Error view users list from DB. {method}: {error}", nameof(GetUsersListFromDb), ex);
         }
     }
 
     /// <summary>
     /// Метод, позволяющий получить список пользователей, пользовавщихся ботом
+    /// является методом по умолчанию, если не подключена база данных
     /// </summary>
     /// <param name="botClient"></param>
     /// <param name="update"></param>
@@ -86,14 +122,21 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             var callbackQuery = update.CallbackQuery;
             var chatId = callbackQuery!.Message!.Chat.Id;
-            string combinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ListUsers.txt");
+
+            if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+            {
+                await GetUsersListFromDb(botClient, callbackQuery, chatId, cancellationToken);
+                return;
+            }
+
+            var combinePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ListUsers.txt");
 
             if (System.IO.File.Exists(combinePath))
             {
                 var fileContent = await System.IO.File.ReadAllTextAsync(combinePath, cancellationToken);
-                StringBuilder responseBuilder = new StringBuilder();
+                var responseBuilder = new StringBuilder();
 
-                foreach (string line in fileContent.Split('\n'))
+                foreach (var line in fileContent.Split('\n'))
                 {
                     if (!string.IsNullOrWhiteSpace(line))
                         responseBuilder.AppendLine($"User Info: {line.Trim()}");
@@ -117,8 +160,38 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
-    internal static string? LastUser { get; set; }
+    /// <summary>
+    /// Метод, который получает количество, которые были написаны боту
+    /// </summary>
+    /// <param name="botClient"></param>
+    /// <param name="callbackQuery"></param>
+    /// <param name="chatId"></param>
+    /// <param name="cancellationToken"></param>
+    private async Task GetCountMessageFromDb(ITelegramBotClient botClient, CallbackQuery callbackQuery, long chatId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await connection.OpenAsync(cancellationToken);
 
+            const string countMessagesFromDb = "SELECT Count(*) FROM messages;";
+
+            await using var commandCountMessages = new NpgsqlCommand(countMessagesFromDb, connection);
+            var countMessage = (long)(await commandCountMessages.ExecuteScalarAsync(cancellationToken))!;
+
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
+                $"Количество написанных сообщений боту: {countMessage}!" +
+                $"\nКоличество отправленных подарков: {countMessage / BotConstants.CountMessageForPresent}!",
+                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+
+            Logger.Info("!!!SPECIAL COMMAND!!! View count message from DB success!");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("!!!SPECIAL COMMAND!!! Error view count message from DB. {method}: {error}", nameof(GetCountMessage), ex);
+        }
+    }
+    
     /// <summary>
     /// Метод, позволяющий получить количество отправленных ботом подарков,
     /// количество написанных сообщений, и юзернейм последнего написавшего человека боту
@@ -132,18 +205,22 @@ internal class GettingSpecialCommands : ICheckMessage
         var chatId = callbackQuery!.Message!.Chat.Id;
         try
         {
+            if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+            {
+                await GetCountMessageFromDb(botClient, callbackQuery, chatId, cancellationToken);
+                return;
+            }
+
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 $"Количество написанных сообщений боту: {CountMessage}!" +
-                $"\nКоличество отправленных подарков: {CountMessage / BotConstants.CountMessageForPresent}!" +
-                $"\nПоследний написавший человек боту: {LastUser}!",
+                $"\nКоличество отправленных подарков: {CountMessage / BotConstants.CountMessageForPresent}!",
                 replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message success!");
         }
         catch (Exception ex)
         {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error view count message. {method}: {error}", nameof(GetCountMessage),
-                ex);
+            Logger.Error("!!!SPECIAL COMMAND!!! Error view count message. {method}: {error}", nameof(GetCountMessage), ex);
         }
     }
 
@@ -160,14 +237,14 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             var dateTime = DateTime.Now;
             string? logDate = default;
-            string month = dateTime.Month <= 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
-            string day = dateTime.Day <= 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
+            var month = dateTime.Month <= 9 ? $"0{dateTime.Month}" : $"{dateTime.Month}";
+            var day = dateTime.Day <= 9 ? $"0{dateTime.Day}" : $"{dateTime.Day}";
 
             if (!CheckingMessageText(message.Text!, "specialcommandforgetlogfile"))
             {
-                int index = message.Text!.IndexOf(":", StringComparison.Ordinal);
+                var index = message.Text!.IndexOf(":", StringComparison.Ordinal);
                 if (index != -1)
-                    logDate = message.Text!.Substring(index + 1).Trim();
+                    logDate = message.Text![(index + 1)..].Trim();
 
                 var pathOnProject = AppDomain.CurrentDomain.BaseDirectory;
                 var path = Path.Combine(pathOnProject,
@@ -175,8 +252,8 @@ internal class GettingSpecialCommands : ICheckMessage
 
                 if (System.IO.File.Exists(path))
                 {
-                    await using FileStream fileStream = new FileStream(path, FileMode.Open);
-                    InputFileStream inputFile = new InputFileStream(fileStream, logDate);
+                    await using var fileStream = new FileStream(path, FileMode.Open);
+                    var inputFile = new InputFileStream(fileStream, logDate);
                     await botClient.SendDocumentAsync(message.Chat, inputFile,
                         caption: $"{update.Message?.From?.FirstName}, держи логи за выбранный день!",
                         cancellationToken: cancellationToken);
@@ -227,37 +304,6 @@ internal class GettingSpecialCommands : ICheckMessage
         }
     }
 
-    /// <summary>
-    /// Метод, позволяющий получить информацию о текущем пользователе
-    /// </summary>
-    /// <param name="botClient"></param>
-    /// <param name="update"></param>
-    /// <param name="message"></param>
-    /// <param name="cancellationToken"></param>
-    public async Task GetInfoYourProfile(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await botClient.SendTextMessageAsync(message.Chat,
-                $"{update.Message?.From?.FirstName}, держи информацию о аккаунте!\n\n" +
-                $"Идентификатор пользователя: {message.From?.Id}\n" +
-                $"Имя пользователя: @{message.From?.Username}\n" +
-                $"Имя: {message.From?.FirstName}\n" +
-                $"Фамилия: {message.From?.LastName}\n" +
-                $"Язык: {message.From?.LanguageCode}\n" +
-                $"Информация о местоположении: {message.Location}\n" +
-                $"Контактные данные: {message.Contact}\n" +
-                $"Наличие Telegram премиум: {message.From?.IsPremium}\n" +
-                $"Бот: {message.From?.IsBot}", cancellationToken: cancellationToken);
-            Logger.Info("!!!SPECIAL COMMAND!!! Get your info profile success!");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error your info profile. {method}: {error}",
-                nameof(GetInfoYourProfile), ex);
-        }
-    }
-
     private const string EndPoint = "https://api.openai.com/v1/chat/completions";
     private static readonly List<GptResponse.Message> Messages = new();
     private string? GptMessage { get; set; }
@@ -283,7 +329,7 @@ internal class GettingSpecialCommands : ICheckMessage
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration.OpenAi!.ChatGptKey}");
 
-            GptResponse.Message mes = new GptResponse.Message
+            var mes = new GptResponse.Message
             {
                 Role = "user",
                 Content = GptMessage
@@ -291,20 +337,20 @@ internal class GettingSpecialCommands : ICheckMessage
 
             Messages.Add(mes);
 
-            GptResponse.Request requestData = new GptResponse.Request
+            var requestData = new GptResponse.Request
             {
                 ModelId = "gpt-3.5-turbo",
                 Messages = Messages
             };
             using var response =
                 await httpClient.PostAsJsonAsync(EndPoint, requestData, cancellationToken: cancellationToken);
-            GptResponse.ResponseData? responseData =
+            var responseData =
                 await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(
                     cancellationToken: cancellationToken);
 
             var choices = responseData?.Choices ?? new List<GptResponse.Choice>();
 
-            GptResponse.Message responseMessage = choices[0].Message;
+            var responseMessage = choices[0].Message;
             Messages.Add(responseMessage);
             var responseText = responseMessage.Content.Trim();
             Logger.Info($"ChatGPT: {responseText}");
@@ -336,7 +382,7 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             // Для того чтобы передать символ & в запросе, его необходимо экранировать с помощью кода %26 (если запрос содержит символ &)
             var messageToFix = HttpUtility.UrlEncode(message.Text);
-            
+
             //Обращение к API Layout Keyboard Converting Service
             var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={messageToFix![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
 
@@ -348,7 +394,7 @@ internal class GettingSpecialCommands : ICheckMessage
                 var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 Logger.Info("!!!SPECIAL COMMAND!!! Method {method} complite success!", nameof(GetFixKeyboardLayout));
-                
+
                 await botClient.SendTextMessageAsync(message.Chat,
                     $"{update.Message?.From?.FirstName}, держи конвертированный текст:\n" +
                     $"\n```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```\n" +

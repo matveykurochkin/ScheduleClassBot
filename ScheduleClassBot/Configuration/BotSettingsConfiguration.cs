@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.Data;
+using NLog;
 using Npgsql;
 
 namespace ScheduleClassBot.Configuration;
@@ -20,7 +21,7 @@ public class BotSettingsConfiguration
     public UserIdSection? UserId { get; set; }
     public OpenAiSection? OpenAi { get; set; }
     public DataBaseConfiguration? DataBase { get; init; }
-    
+
     /// <summary>
     /// Метод, для проверки строки подключения не пустая ли они и правильного ли формата
     /// </summary>
@@ -28,14 +29,20 @@ public class BotSettingsConfiguration
     /// <returns></returns>
     public bool IsWorkWithDb(string? connectionString)
     {
+        if (string.IsNullOrEmpty(connectionString))
+            return false; // Если строка подключения пуста, не выводим ошибку, а сразу возвращаем false
+
         try
         {
             using var connection = new NpgsqlConnection(connectionString);
-            return !string.IsNullOrEmpty(connectionString) && connection.State != System.Data.ConnectionState.Open;
+            connection.Open();
+            return connection.State == ConnectionState.Open;
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error IsWorkDb method. Error message: {ex.Message}");
+            Logger.Error($"The error is in the method that checks the connection to the database, " +
+                         $"it occurs if you tried to connect the bot to the database, but this did not happen, " +
+                         $"the bot works in the default mode (working with files). Error message: {ex.Message}");
         }
 
         return false;

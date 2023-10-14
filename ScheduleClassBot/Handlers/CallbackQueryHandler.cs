@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using NLog;
+using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Constants;
 using ScheduleClassBot.Interfaces;
 
@@ -12,10 +13,12 @@ internal class CallbackQueryHandler : ICheckMessage
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    private readonly BotSettingsConfiguration _configuration;
     private readonly GettingSpecialCommands _gettingSpecialCommands;
 
-    public CallbackQueryHandler(GettingSpecialCommands gettingSpecialCommands)
+    public CallbackQueryHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands)
     {
+        _configuration = configuration;
         _gettingSpecialCommands = gettingSpecialCommands;
     }
 
@@ -80,32 +83,33 @@ internal class CallbackQueryHandler : ICheckMessage
                 return;
             }
 
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewListUsers))
+            if (_configuration.UserId?.IdUser!.Contains(chatId) == true)
             {
-                await _gettingSpecialCommands.GetUsersList(botClient, update, cancellationToken);
-                return;
+                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewListUsers))
+                {
+                    await _gettingSpecialCommands.GetUsersList(botClient, update, cancellationToken);
+                    return;
+                }
+
+                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewCountMessages))
+                {
+                    await _gettingSpecialCommands.GetCountMessage(botClient, update, cancellationToken);
+                    return;
+                }
+
+                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.CommandBack))
+                {
+                    await _gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);
+                    return;
+                }
+
+                Logger.Info($"Press Inline button! CallbackQuery: {update.CallbackQuery?.Data}");
             }
 
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewCountMessages))
-            {
-                await _gettingSpecialCommands.GetCountMessage(botClient, update, cancellationToken);
-                return;
-            }
+            await botClient.EditMessageTextAsync(chatId.ToString(), update.CallbackQuery!.Message!.MessageId, 
+                "Извините, но возможность использования специальных команд отозвана. Обратитесь к администратору, если у вас есть вопросы.", cancellationToken: cancellationToken);
 
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForGetLogFile))
-            {
-                await botClient.SendTextMessageAsync(chatId, BotConstants.SpecialCommandForGetLogFile,
-                    cancellationToken: cancellationToken);
-                return;
-            }
-
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.CommandBack))
-            {
-                await _gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);
-                return;
-            }
-
-            Logger.Info($"Press Inline button! CallbackQuery: {update.CallbackQuery?.Data}");
+            Logger.Info("The ability to use special commands has been revoked for your profile, profile ID : {0}", chatId);
         }
     }
 }

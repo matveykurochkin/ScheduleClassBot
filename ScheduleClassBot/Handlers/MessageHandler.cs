@@ -296,19 +296,6 @@ internal class MessageHandler : ICheckMessage
                 return;
             }
 
-            if (message.Text.StartsWith(BotConstants.SpecialCommandForFixKeyboardLayout, StringComparison.OrdinalIgnoreCase)
-                && CheckingUserId(message.From?.Id))
-            {
-                await _gettingSpecialCommands.GetFixKeyboardLayout(botClient, update, message, cancellationToken);
-                return;
-            }
-
-            if (CheckingUserId(message.From?.Id))
-            {
-                await _gettingSpecialCommands.GetAnswersFromChatGpt(botClient, update, message, cancellationToken);
-                return;
-            }
-
             await botClient.SendTextMessageAsync(message.Chat,
                 $"{update.Message?.From?.FirstName}, извини, я не знаю как ответить на это!" +
                 $"\nВозможно ты используешь старую команду, попробуй обновить бота, нажав сюда: /start!",

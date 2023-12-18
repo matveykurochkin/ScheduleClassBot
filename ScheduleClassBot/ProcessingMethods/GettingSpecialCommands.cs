@@ -1,14 +1,10 @@
-﻿using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using System.Web;
+﻿using System.Text;
 using NLog;
 using Npgsql;
 using ScheduleClassBot.BotButtons;
 using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Constants;
 using ScheduleClassBot.Interfaces;
-using ScheduleClassBot.Responses;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -301,117 +297,6 @@ internal class GettingSpecialCommands : ICheckMessage
         {
             Logger.Error("!!!SPECIAL COMMAND!!! Error button with all special commands. {method}: {error}",
                 nameof(GetButtonWithSpecialCommands), ex);
-        }
-    }
-
-    private const string EndPoint = "https://api.openai.com/v1/chat/completions";
-    private static readonly List<GptResponse.Message> Messages = new();
-    private string? GptMessage { get; set; }
-
-    /// <summary>
-    /// Метод, обрабатывающий запрос адресованный Chat GPT и отправляет пользователю ответ
-    /// </summary>
-    /// <param name="botClient"></param>
-    /// <param name="update"></param>
-    /// <param name="message"></param>
-    /// <param name="cancellationToken"></param>
-    public async Task GetAnswersFromChatGpt(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
-    {
-        var currentMessageId = message.MessageId;
-        try
-        {
-            GptMessage = message.Text!;
-            var firstMessage = await botClient.SendTextMessageAsync(message.Chat,
-                $"{update.Message?.From?.FirstName}, обрабатываю твой запрос...", parseMode: ParseMode.Markdown,
-                cancellationToken: cancellationToken);
-            currentMessageId = firstMessage.MessageId;
-
-            using var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration.OpenAi!.ChatGptKey}");
-
-            var mes = new GptResponse.Message
-            {
-                Role = "user",
-                Content = GptMessage
-            };
-
-            Messages.Add(mes);
-
-            var requestData = new GptResponse.Request
-            {
-                ModelId = "gpt-3.5-turbo",
-                Messages = Messages
-            };
-            using var response =
-                await httpClient.PostAsJsonAsync(EndPoint, requestData, cancellationToken: cancellationToken);
-            var responseData =
-                await response.Content.ReadFromJsonAsync<GptResponse.ResponseData>(
-                    cancellationToken: cancellationToken);
-
-            var choices = responseData?.Choices ?? new List<GptResponse.Choice>();
-
-            var responseMessage = choices[0].Message;
-            Messages.Add(responseMessage);
-            var responseText = responseMessage.Content.Trim();
-            Logger.Info($"ChatGPT: {responseText}");
-            await botClient.EditMessageTextAsync(message.Chat, currentMessageId, $"Chat GPT: {responseText}",
-                parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
-            Logger.Info("!!!SPECIAL COMMAND!!! Get response from Chat GPT success!");
-        }
-        catch (Exception ex)
-        {
-            await botClient.EditMessageTextAsync(message.Chat, currentMessageId,
-                $"{update.Message?.From?.FirstName}, произошла ошибка, попробуй еще раз!",
-                cancellationToken: cancellationToken);
-            Logger.Error("!!!SPECIAL COMMAND!!! Error response from Chat GPT. {method}: {error}", nameof(GetAnswersFromChatGpt), ex);
-            Messages.Clear();
-        }
-    }
-
-    /// <summary>
-    /// Метод, позволяющий конвертировать ошибочное написание текста на английском/русском языке
-    /// пример: ghbdtn -> привет, рш -> hi
-    /// </summary>
-    /// <param name="botClient"></param>
-    /// <param name="update"></param>
-    /// <param name="message"></param>
-    /// <param name="cancellationToken"></param>
-    public async Task GetFixKeyboardLayout(ITelegramBotClient botClient, Update update, Message message, CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Для того чтобы передать символ & в запросе, его необходимо экранировать с помощью кода %26 (если запрос содержит символ &)
-            var messageToFix = HttpUtility.UrlEncode(message.Text);
-
-            //Обращение к API Layout Keyboard Converting Service
-            var apiUrl = $"http://79.137.198.66:9060/FixMessage?message={messageToFix![BotConstants.SpecialCommandForFixKeyboardLayout.Length..]}";
-
-            using var client = new HttpClient();
-            var response = await client.GetAsync(apiUrl, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                Logger.Info("!!!SPECIAL COMMAND!!! Method {method} complite success!", nameof(GetFixKeyboardLayout));
-
-                await botClient.SendTextMessageAsync(message.Chat,
-                    $"{update.Message?.From?.FirstName}, держи конвертированный текст:\n" +
-                    $"\n```\n{JsonSerializer.Deserialize<string>(responseBody)}\n```\n" +
-                    $"\nНажми чтобы скопировать!", parseMode: ParseMode.Markdown,
-                    cancellationToken: cancellationToken);
-                return;
-            }
-
-            await botClient.SendTextMessageAsync(message.Chat,
-                $"{update.Message?.From?.FirstName}, произошла ошибка конвертирования:" +
-                $"\nstatus code: {response.StatusCode}," +
-                $"\nerror message: {response.Content}",
-                cancellationToken: cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error Fix Keyboard Layout. {method}: {error}", nameof(GetFixKeyboardLayout), ex);
         }
     }
 }

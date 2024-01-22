@@ -85,7 +85,6 @@ public static class BotConstants
     public const string SpecialCommandForGetLogFile = "specialcommandforgetlogfile";
     public const string SpecialCommandForViewListUsers = "specialcommandforviewlistusers";
     public const string SpecialCommandForViewCountMessages = "specialcommandforviewcountmessages";
-    public const string SpecialCommandForFixKeyboardLayout = "c ";
 
     #endregion
 

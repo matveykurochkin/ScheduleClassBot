@@ -1,6 +1,9 @@
-﻿using NLog;
+﻿using System.Text;
+using NLog;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Newtonsoft.Json;
+using File = System.IO.File;
 
 namespace ScheduleClassBot.ProcessingMethods;
 
@@ -8,6 +11,41 @@ internal class GettingSessionSchedule
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    private class Consultation
+    {
+        public string? date { get; set; }
+        public string? time { get; set; }
+        public string? room { get; set; }
+    }
+
+    private class Exam
+    {
+        public string? date { get; set; }
+        public string? time { get; set; }
+        public string? room { get; set; }
+    }
+
+    private class ExamSchedule
+    {
+        public string? number { get; set; }
+        public string? subject { get; set; }
+        public string? teacher { get; set; }
+        public Consultation? consultation { get; set; }
+        public Exam? exam { get; set; }
+    }
+
+    private string FormatExamSchedules(List<ExamSchedule> examSchedules)
+    {
+        var result = new StringBuilder();
+        foreach (var exam in examSchedules)
+        {
+            result.AppendLine($"{exam.number} {exam.subject} {exam.teacher}");
+            result.AppendLine($"КОНСУЛЬТАЦИЯ: {exam.consultation!.date} {exam.consultation.time} {exam.consultation.room}");
+            result.AppendLine($"ЭКЗАМЕН: {exam.exam!.date} {exam.exam.time} {exam.exam.room}\n");
+        }
+        return result.ToString();
+    }
+    
     /// <summary>
     /// Метод, показывающий расписание сессии группы ПМИ-120
     /// </summary>
@@ -18,9 +56,24 @@ internal class GettingSessionSchedule
     {
         try
         {
+            // Получаем путь к текущей директории, из которой выполняется приложение
+            var currentDirectory = Directory.GetCurrentDirectory();
+            // Относительный путь к файлу JSON
+            var jsonFilePath = Path.Combine(currentDirectory, "Schedule", "PMI120Session.json");
+            // Читаем содержимое файла JSON
+            var jsonString = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
+            // Десериализация в объект типа SessionSchedule
+            var sessionData = JsonConvert.DeserializeObject<List<ExamSchedule>>(jsonString);
+            // Получаем строку расписания сессии
+            var sessionScheduleString = FormatExamSchedules(sessionData!);
+            
             await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПМИ-120📌\n\n" +
-                                                               $"Расписание экзаменационной сессии будет доступно позднее!",
+                                                               $"{sessionScheduleString}",
                 cancellationToken: cancellationToken);
+            
+            // await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПМИ-120📌" +
+            //                                                    $"Расписание экзаменационной сессии будет доступно позднее!",
+            //     cancellationToken: cancellationToken);
 
             Logger.Info("View session schedule for group PMI success!");
         }
@@ -40,6 +93,17 @@ internal class GettingSessionSchedule
     {
         try
         {
+            // Получаем путь к текущей директории, из которой выполняется приложение
+            var currentDirectory = Directory.GetCurrentDirectory();
+            // Относительный путь к файлу JSON
+            var jsonFilePath = Path.Combine(currentDirectory, "Schedule", "PRI121Session.json");
+            // Читаем содержимое файла JSON
+            var jsonString = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
+            // Десериализация в объект типа SessionSchedule
+            var sessionData = JsonConvert.DeserializeObject<List<ExamSchedule>>(jsonString);
+            // Получаем строку расписания сессии
+            var sessionScheduleString = FormatExamSchedules(sessionData!);
+            
             await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПРИ-121📌\n\n" +
                                                                $"Расписание экзаменационной сессии будет доступно позднее!",
                 cancellationToken: cancellationToken);

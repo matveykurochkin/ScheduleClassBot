@@ -174,10 +174,15 @@ internal class GettingSpecialCommands : ICheckMessage
 
             await using var commandCountMessages = new NpgsqlCommand(countMessagesFromDb, connection);
             var countMessage = (long)(await commandCountMessages.ExecuteScalarAsync(cancellationToken))!;
+            
+            const string countPresentsFromDb = "SELECT Count(*) FROM presents;";
+
+            await using var commandCountPresents = new NpgsqlCommand(countPresentsFromDb, connection);
+            var countPresents = (long)(await commandCountPresents.ExecuteScalarAsync(cancellationToken))!;
 
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
                 $"Количество написанных сообщений боту: {countMessage}!" +
-                $"\nКоличество отправленных подарков: {countMessage / BotConstants.CountMessageForPresent}!",
+                $"\nКоличество отправленных подарков: {countPresents}!",
                 replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message from DB success!");
@@ -209,7 +214,7 @@ internal class GettingSpecialCommands : ICheckMessage
 
             await botClient.EditMessageTextAsync(chatId, callbackQuery.Message.MessageId,
                 $"Количество написанных сообщений боту: {CountMessage}!" +
-                $"\nКоличество отправленных подарков: {CountMessage / BotConstants.CountMessageForPresent}!",
+                $"\nКоличество отправленных подарков: {CountMessage / BotConstants.PresentPercent}!",
                 replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message success!");

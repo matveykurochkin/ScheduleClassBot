@@ -9,7 +9,6 @@ namespace ScheduleClassBot.Configuration;
 /// после инициализации в классе хранятся:
 /// токен подключения к телеграм боту,
 /// список людей, кому доступны специальные команды,
-/// токен для подключения к Chat GPT
 /// строка для подклчения к бд, если пропущена или введена не кореектно, бот работает по умолчанию с файлами
 /// (обязательным параметром является только токен подключения к боту)
 /// (получает данные с файла appsettings.json и присваивает значение полей одноименным полям в текущем классе)
@@ -19,7 +18,6 @@ public class BotSettingsConfiguration
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     public BotTokenSection? BotToken { get; set; }
     public UserIdSection? UserId { get; set; }
-    public OpenAiSection? OpenAi { get; set; }
     public DataBaseConfiguration? DataBase { get; init; }
 
     /// <summary>
@@ -64,14 +62,6 @@ public class BotTokenSection
 public class UserIdSection
 {
     public List<long>? IdUser { get; set; }
-}
-
-/// <summary>
-/// Класс, который содержит свойство ChatGptKey, которое необходимо для работы Chat GPT
-/// </summary>
-public class OpenAiSection
-{
-    public string? ChatGptKey { get; set; }
 }
 
 /// <summary>

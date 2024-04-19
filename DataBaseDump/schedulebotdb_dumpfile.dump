@@ -41,11 +41,25 @@ ALTER TABLE public.botusers OWNER TO postgres;
 CREATE TABLE public.messages (
     userid bigint NOT NULL,
     text character varying(255),
-    id bigint NOT NULL
+    id bigint NOT NULL,
+    messagedate timestamp without time zone
 );
 
 
 ALTER TABLE public.messages OWNER TO postgres;
+
+--
+-- Name: presents; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.presents (
+    userid bigint NOT NULL,
+    id bigint NOT NULL,
+    text character varying(255)
+);
+
+
+ALTER TABLE public.presents OWNER TO postgres;
 
 --
 -- Name: botusers botusers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -69,6 +83,22 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_userid_fkey FOREIGN KEY (userid) REFERENCES public.botusers(id) ON DELETE CASCADE;
+
+
+--
+-- Name: presents presents_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.presents
+    ADD CONSTRAINT presents_id_fkey FOREIGN KEY (id) REFERENCES public.messages(id) ON DELETE CASCADE;
+
+
+--
+-- Name: presents presents_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.presents
+    ADD CONSTRAINT presents_userid_fkey FOREIGN KEY (userid) REFERENCES public.botusers(id) ON DELETE CASCADE;
 
 
 --

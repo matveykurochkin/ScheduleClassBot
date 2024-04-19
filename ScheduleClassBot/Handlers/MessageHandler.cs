@@ -7,6 +7,7 @@ using ScheduleClassBot.Interfaces;
 using ScheduleClassBot.ProcessingMethods;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.Handlers;
 
@@ -29,15 +30,15 @@ internal class MessageHandler : ICheckMessage
     private readonly ReplyButtons _replyButtons = new();
 
     /// <summary>
-    /// Метод, сохраняющий id пользователя, его сообщение и id сообщения в базу данных
+    /// Метод, сохраняющий id пользователя, его сообщение, id сообщения и текущую дату в базу данных
     /// </summary>
     /// <param name="message"></param>
     private void SaveMessageForDb(Message message)
     {
         try
         {
-            const string insertMessage = "INSERT INTO messages (USERID, TEXT, ID)" +
-                                         "VALUES (@userid, @text, @id);";
+            const string insertMessage = "INSERT INTO messages (USERID, TEXT, ID, MESSAGEDATE)" +
+                                         "VALUES (@userid, @text, @id, @messagedate);";
 
             using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
             using var command = new NpgsqlCommand(insertMessage, connection);
@@ -45,6 +46,7 @@ internal class MessageHandler : ICheckMessage
             command.Parameters.AddWithValue("@userid", message.From?.Id!);
             command.Parameters.AddWithValue("@text", message.Text!);
             command.Parameters.AddWithValue("@id", message.MessageId);
+            command.Parameters.AddWithValue("@messagedate", DateTime.Now); // Добавляем текущую дату и время
 
             connection.Open();
             var rowsAffected = command.ExecuteNonQuery();
@@ -91,6 +93,37 @@ internal class MessageHandler : ICheckMessage
         }
     }
 
+    /// <summary>
+    /// Метод, сохраняющий информацию о полученных подарках в базе данных.
+    /// Для сохранения используются данные из сообщения.
+    /// </summary>
+    /// <param name="message">Сообщение пользователя</param>
+    private async Task RecordPresentInDb(Message message)
+    {
+        try
+        {
+            const string insertPresent = "INSERT INTO presents (userid, id, text) " +
+                                         "VALUES (@userid, @id, @text);";
+
+            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await using var command = new NpgsqlCommand(insertPresent, connection);
+
+            command.Parameters.AddWithValue("@userid", message.From?.Id!);
+            command.Parameters.AddWithValue("@id", message.MessageId);
+            command.Parameters.AddWithValue("@text", message.Text!);
+
+            await connection.OpenAsync();
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            Logger.Info(rowsAffected > 0
+                ? "Информация о полученном подарке успешно добавлена в базу данных"
+                : "Произошла ошибка при добавлении информации о подарке в базу данных");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Ошибка при сохранении информации о подарке в базу данных. Сообщение об ошибке: {ex.Message}");
+        }
+    }
+    
     /// <summary>
     /// Метод, сохраняющий новых пользователей, на вход получает сообщение, так как из сообщения можно получить
     /// необходимую информацию о том, кто его отправил, если пользователь новый происходит сохранение, если старый - ничего не происходит
@@ -159,10 +192,21 @@ internal class MessageHandler : ICheckMessage
     /// <param name="cancellationToken"></param>
     private async Task PresentStickers(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        await botClient.SendTextMessageAsync(update.Message!.Chat,
-            $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁" +
-            $"\nhttps://t.me/addstickers/BusyaEveryDay",
-            cancellationToken: cancellationToken);
+        var inlineKeyboard = new InlineKeyboardMarkup(new[]
+        {
+            new []
+            {
+                InlineKeyboardButton.WithUrl("Нажми сюда, чтобы забрать!", "https://t.me/addstickers/BusyaEveryDay")
+            }
+        });
+
+        await botClient.SendTextMessageAsync(
+            update.Message!.Chat,
+            $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁",
+            cancellationToken: cancellationToken,
+            replyMarkup: inlineKeyboard
+        );
+
         Logger.Info("!!!PRESENT!!! Best Stickers BusyaEveryDay!");
     }
 
@@ -184,19 +228,32 @@ internal class MessageHandler : ICheckMessage
 
         if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
         {
-            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
-            await connection.OpenAsync(cancellationToken);
+             SaveUserForDb(message);
+             SaveMessageForDb(message);
+            
+            // Шанс получения подарка
+            var chance = BotConstants.PresentPercent / 100;
+            
+            // Генерация случайного числа от 0 до 1
+            var random = new Random().NextDouble();
+            
+            // NextDouble() генерирует случайное число типа double в диапазоне от 0.0 (включительно) до 1.0 (исключительно) 
+            // с использованием равномерного распределения. Это означает, что каждое возможное значение 
+            // в этом диапазоне имеет одинаковую вероятность быть выбранным.
+            // Внутри NextDouble() используется базовый генератор псевдослучайных чисел (Random Number Generator), 
+            // который обычно называется System.Random. Этот генератор использует некоторый начальный "зерно" (seed), 
+            // обычно основанное на текущем времени, чтобы генерировать последовательность псевдослучайных чисел. 
+            // Каждый раз, когда вызывается NextDouble(), он использует этот генератор, чтобы создать следующее случайное число.
+            // Генераторы псевдослучайных чисел создают "псевдослучайные" числа, потому что их выход не является истинно случайным, 
+            // а зависит от начального "зерна". Однако, при правильном использовании и достаточно большом количестве генерируемых чисел,
+            // эти генераторы обычно обеспечивают достаточно хороший уровень случайности для большинства приложений.
 
-            const string countMessagesFromDb = "SELECT Count(*) FROM messages;";
-
-            SaveUserForDb(message);
-            SaveMessageForDb(message);
-
-            await using var commandCountMessages = new NpgsqlCommand(countMessagesFromDb, connection);
-            var countMessage = (long)(await commandCountMessages.ExecuteScalarAsync(cancellationToken))!;
-
-            if (countMessage > 0 && countMessage % BotConstants.CountMessageForPresent == 0)
+            // Если случайное число меньше или равно шансу, выдаем подарок
+            if (random <= chance)
+            {
                 await PresentStickers(botClient, update, cancellationToken);
+                await RecordPresentInDb(message);
+            }
         }
 
         if (message.Text is null)
@@ -209,12 +266,19 @@ internal class MessageHandler : ICheckMessage
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
-
+        /*
+         * Тестовый участок кода, нужен для того чтобы бот мог отвечать в группах
+         */
+        var botUsername = $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}";
+        if (message.Text!.Contains(botUsername))
+            message.Text = message.Text.Replace(botUsername, "").Trim();
+        
+        
         if (!_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
         {
             SaveNewUser(message);
             GettingSpecialCommands.IncrementCountMessage();
-            if (GettingSpecialCommands.CountMessage > 0 && GettingSpecialCommands.CountMessage % BotConstants.CountMessageForPresent == 0)
+            if (GettingSpecialCommands.CountMessage > 0 && GettingSpecialCommands.CountMessage % BotConstants.PresentPercent == 0)
                 await PresentStickers(botClient, update, cancellationToken);
         }
 

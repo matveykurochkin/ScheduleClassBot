@@ -26,7 +26,6 @@ internal class MessageHandler : ICheckMessage
 
     private readonly GettingSessionSchedule _gettingSession = new();
     private readonly GettingSchedule _gettingSchedule = new();
-    private readonly InlineButtons _inlineButtons = new();
     private readonly ReplyButtons _replyButtons = new();
 
     /// <summary>
@@ -202,7 +201,7 @@ internal class MessageHandler : ICheckMessage
 
         await botClient.SendTextMessageAsync(
             update.Message!.Chat,
-            $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор крутых стикеров! 🎁",
+            $"{update.Message?.From?.FirstName}, поздравляю! Тебе повезло! Ты выиграл набор стикеров! 🎁",
             cancellationToken: cancellationToken,
             replyMarkup: inlineKeyboard
         );
@@ -266,19 +265,15 @@ internal class MessageHandler : ICheckMessage
                 $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}"))
             message.Text = message.Text.Split(' ')[1];
 
-        /*
-         * Тестовый участок кода, нужен для того чтобы бот мог отвечать в группах
-         */
         var botUsername = $"@{botClient.GetMeAsync(cancellationToken: cancellationToken).Result.Username}";
         if (message.Text!.Contains(botUsername))
             message.Text = message.Text.Replace(botUsername, "").Trim();
-        
         
         if (!_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
         {
             SaveNewUser(message);
             GettingSpecialCommands.IncrementCountMessage();
-            if (GettingSpecialCommands.CountMessage > 0 && GettingSpecialCommands.CountMessage % BotConstants.PresentPercent == 0)
+            if (GettingSpecialCommands.CountMessage > 0 && GettingSpecialCommands.CountMessage % BotConstants.PresentPercentWithoutDb == 0)
                 await PresentStickers(botClient, update, cancellationToken);
         }
 
@@ -288,10 +283,7 @@ internal class MessageHandler : ICheckMessage
                 || CheckingMessageText(message.Text, BotConstants.CommandBack))
             {
                 await botClient.SendTextMessageAsync(message.Chat,
-                    $"{update.Message?.From?.FirstName}, смотри мои возможности!",
-                    replyMarkup: _replyButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
-                await botClient.SendTextMessageAsync(message.Chat,
-                    $"Я могу показать расписание занятий таких групп: {BotConstants.GroupPmi} и {BotConstants.GroupPri}!\n\n" +
+                    $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\nЯ могу показать расписание занятий таких групп: {BotConstants.GroupPmi} и {BotConstants.GroupPri}!\n\n" +
                     $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                     $"Доступные команды:\n" +
                     $"{BotConstants.CommandStart} - обновление бота\n" +
@@ -301,7 +293,7 @@ internal class MessageHandler : ICheckMessage
                     $"{BotConstants.CommandTodayPri} - расписание на сегодня группы ПРИ-121\n" +
                     $"{BotConstants.CommandTomorrowPri} - расписание на завтра группы ПРИ-121\n" +
                     $"{BotConstants.CommandSessionPri} - расписание сессии группы ПРИ-121",
-                    replyMarkup: _inlineButtons.InlineButtonOnBot(), cancellationToken: cancellationToken);
+                    replyMarkup: _replyButtons.MainButtonOnBot(), cancellationToken: cancellationToken);
                 return;
             }
 

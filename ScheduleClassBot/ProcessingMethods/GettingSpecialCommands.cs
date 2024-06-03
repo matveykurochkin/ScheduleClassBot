@@ -271,8 +271,7 @@ internal class GettingSpecialCommands : ICheckMessage
                     $"{update.Message?.From?.FirstName}, команда выглядит следующим образом:" +
                     $"\n```\nspecialcommandforgetlogfile:yyyy-MM-dd.log\n```" +
                     $"\nПример команды на сегодня:\n" +
-                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```\n" +
-                    $"Нажми, чтобы скопировать :)", parseMode: ParseMode.Markdown,
+                    $"```\nspecialcommandforgetlogfile:{dateTime.Year}-{month}-{day}.log\n```\n", parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! Get log file success!");

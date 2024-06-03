@@ -48,41 +48,6 @@ internal class CallbackQueryHandler : ICheckMessage
 
         if (update.CallbackQuery?.Data is not null)
         {
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.Like))
-            {
-                var inlineButton = new InlineKeyboardMarkup(new[]
-                {
-                    new[]
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++CountLike})", BotConstants.Like),
-                        InlineKeyboardButton.WithCallbackData(text: "👎🏻", BotConstants.DisLike)
-                    }
-                });
-                await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
-                    cancellationToken: cancellationToken);
-                Logger.Info("!!!SPECIAL COMMAND!!! The like button is pressed by the user!");
-                return;
-            }
-
-            if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.DisLike))
-            {
-                var inlineButton = new InlineKeyboardMarkup(new[]
-                {
-                    new[]
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: $"👍🏻 ({++CountLike})", BotConstants.Like),
-                        InlineKeyboardButton.WithCallbackData(text: "👎🏻", BotConstants.DisLike)
-                    }
-                });
-                await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
-                    "Я знал, что ты можешь ошибиться при нажатии на кнопку лайка, поэтому я сразу же исправил эту ошибку! 😊",
-                    showAlert: true, cancellationToken: cancellationToken);
-                await botClient.EditMessageReplyMarkupAsync(chatId, callbackQuery.Message.MessageId, inlineButton,
-                    cancellationToken: cancellationToken);
-                Logger.Info("!!!SPECIAL COMMAND!!! The dislike button is pressed by the user!");
-                return;
-            }
-
             if (_configuration.UserId?.IdUser!.Contains(chatId) == true)
             {
                 if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewListUsers))

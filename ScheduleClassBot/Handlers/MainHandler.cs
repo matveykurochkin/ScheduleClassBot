@@ -19,8 +19,6 @@ internal class MainHandler
 
     /// <summary>
     /// Второстепенный обработчик
-    /// использование директивы #pragma необходимо для того, чтобы убрать предупреждение компилятора CS4014
-    /// нам не нужно дожидаться завершения обработки текущего сообщения, чтобы начать обработку следующего
     /// </summary>
     /// <param name="botClient"></param>
     /// <param name="update"></param>
@@ -29,9 +27,7 @@ internal class MainHandler
     {
         try
         {
-#pragma warning disable CS4014
             await Task.Run(() => { HandleUpdateAsyncInternal(botClient, update, cancellationToken); }, cancellationToken);
-#pragma warning restore CS4014
         }
         catch (Exception ex)
         {

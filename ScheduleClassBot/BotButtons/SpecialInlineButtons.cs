@@ -19,10 +19,6 @@ internal class SpecialInlineButtons
             },
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Просмотр количества написанных сообщений", callbackData: BotConstants.SpecialCommandForViewCountMessages)
-            },
-            new[]
-            {
                 InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов", query: BotConstants.SpecialCommandForGetLogFile)
             }
         });

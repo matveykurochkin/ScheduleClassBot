@@ -97,7 +97,8 @@ public static class BotConstants
 
     #region Count Messages For Present
 
-    public const double PresentPercent = 2.64;
+    public const double PresentPercent = 3;
+    public const double PresentPercentWithoutDb = 50;
 
     #endregion
 }

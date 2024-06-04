@@ -11,9 +11,6 @@
 
 3. Расписание на день: пользователь может запросить расписание на определенный день недели. Бот предоставляет информацию о занятиях, включая номер пары, время начала и окончания, название предмета, тип занятия (лекция, практика, лабраторная работа), а также номер аудитории и имя преподавателя.
 
-4. Обращение к чату GPT: пользователь может обратиться к Chat GPT для получения дополнительной информации, ответов на вопросы или даже для развлечения. Chat GPT способен предоставить широкий спектр знаний и помочь в разнообразных ситуациях.
- 
-_Примечание: в версии, которая работает в данный момент Chat GPT доступен только пользователям, ID которых указан в настройках бота!_
 
 # Настройка бота для личного использования 
 ## Настройки подключения к базе данных с помощью СУБД PostgreSQL
@@ -151,60 +148,4 @@ systemctl start schedule-bot
 
 ```bash
 systemctl status schedule-bot
-```
-
-## Скрипт для автоматического обновления и запуска бота на сервере
-```bash
-#!/bin/bash
-
-# Определение текущей директории
-CurrDir=$(pwd)
-
-# Останавливаем службу бота на сервере
-echo stop service
-systemctl stop schedule-bot.service
-
-# Очищаем рабочую директорию бота на сервере
-echo clean
-cd /opt/src/ScheduleClassBot
-
-# Загружаем изменения с GitHub
-git clean -ffxd
-git reset --hard HEAD
-git pull
-
-# Сборка бота
-echo build
-dotnet publish /opt/src/ScheduleClassBot/ScheduleClassBot/ScheduleClassBot.csproj -c Release -r linux-x64 --self-contained
-
-# Создаем резервную копию конфигурационных файлов
-echo bakup
-mkdir -p /opt/schedule-bot/bak
-cp /opt/schedule-bot/linux-x64/ListUsers.txt /opt/schedule-bot/bak/ListUsers.txt
-cp /opt/schedule-bot/linux-x64/nlog.config /opt/schedule-bot/bak/nlog.config
-cp /opt/schedule-bot/linux-x64/appsettings.json /opt/schedule-bot/bak/appsettings.json
-
-# Копируем новые файлы бота
-echo copy
-rm -rf /opt/schedule-bot/linux-x64
-mkdir -p /opt/schedule-bot/linux-x64
-cp -R  /opt/src/ScheduleClassBot/ScheduleClassBot/bin/Release/net7.0/linux-x64/publish/* /opt/schedule-bot/linux-x64
-
-# Восстанавливаем конфигурационные файлы из резервной копии
-echo restore from bakup
-cp /opt/schedule-bot/bak/ListUsers.txt /opt/schedule-bot/linux-x64/ListUsers.txt
-cp /opt/schedule-bot/bak/nlog.config /opt/schedule-bot/linux-x64/nlog.config
-cp /opt/schedule-bot/bak/appsettings.json /opt/schedule-bot/linux-x64/appsettings.json
-rm -rf /opt/schedule-bot/bak
-
-# Запускаем службу бота на сервере
-echo run service
-systemctl start schedule-bot.service
-
-# Проверяем статус службы
-echo check service
-systemctl status schedule-bot.service
-
-# Возвращаемся в исходную директорию
-cd $CurrDir
 ```

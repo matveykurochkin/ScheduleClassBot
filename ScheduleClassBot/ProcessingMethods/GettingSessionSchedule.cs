@@ -105,7 +105,7 @@ internal class GettingSessionSchedule
             var sessionScheduleString = FormatExamSchedules(sessionData!);
             
             await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПРИ-121📌\n\n" +
-                                                               $"Расписание экзаменационной сессии будет доступно позднее!",
+                                                               $"{sessionScheduleString}",
                 cancellationToken: cancellationToken);
             
             Logger.Info("View session schedule for group PRI success!");

@@ -283,13 +283,10 @@ internal class MessageHandler : ICheckMessage
                 || CheckingMessageText(message.Text, BotConstants.CommandBack))
             {
                 await botClient.SendTextMessageAsync(message.Chat,
-                    $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\nЯ могу показать расписание занятий таких групп: {BotConstants.GroupPmi} и {BotConstants.GroupPri}!\n\n" +
+                    $"{update.Message?.From?.FirstName}, смотри мои возможности!\n\nЯ могу показать расписание занятий группы {BotConstants.GroupPri}!\n\n" +
                     $"Для просмотра расписания необходимо выбрать группу и день недели, также я расскажу числитель или знаменатель сейчас идет!\n\n" +
                     $"Доступные команды:\n" +
                     $"{BotConstants.CommandStart} - обновление бота\n" +
-                    $"{BotConstants.CommandTodayPmi} - расписание на сегодня группы ПМИ-120\n" +
-                    $"{BotConstants.CommandTomorrowPmi} - расписание на завтра группы ПМИ-120\n" +
-                    $"{BotConstants.CommandSessionPmi} - расписание сессии группы ПМИ-120\n" +
                     $"{BotConstants.CommandTodayPri} - расписание на сегодня группы ПРИ-121\n" +
                     $"{BotConstants.CommandTomorrowPri} - расписание на завтра группы ПРИ-121\n" +
                     $"{BotConstants.CommandSessionPri} - расписание сессии группы ПРИ-121",
@@ -297,20 +294,9 @@ internal class MessageHandler : ICheckMessage
                 return;
             }
 
-            if (CheckingMessageText(message.Text, BotConstants.GroupPmi)
-                || CheckingMessageText(message.Text, BotConstants.GroupPri))
+            if (CheckingMessageText(message.Text, BotConstants.GroupPri))
             {
                 await _gettingSchedule.GetButtonForGroup(botClient, message, update, message.Text!);
-                return;
-            }
-
-            if (GettingSchedule.DayOfWeekPmi.Contains(message.Text)
-                || CheckingMessageText(message.Text, BotConstants.ScheduleForPmiToday)
-                || CheckingMessageText(message.Text, BotConstants.CommandTodayPmi)
-                || CheckingMessageText(message.Text, BotConstants.ScheduleForPmiTomorrow)
-                || CheckingMessageText(message.Text, BotConstants.CommandTomorrowPmi))
-            {
-                await _gettingSchedule.GetScheduleForGroupPMI(botClient, message, message.Text);
                 return;
             }
 
@@ -321,13 +307,6 @@ internal class MessageHandler : ICheckMessage
                 || CheckingMessageText(message.Text, BotConstants.CommandTomorrowPri))
             {
                 await _gettingSchedule.GetScheduleForGroupPRI(botClient, message, message.Text);
-                return;
-            }
-
-            if (CheckingMessageText(message.Text, BotConstants.ScheduleSessionForPmi)
-                || CheckingMessageText(message.Text, BotConstants.CommandSessionPmi))
-            {
-                await _gettingSession.GetSessionOnPMI(botClient, message, cancellationToken);
                 return;
             }
 

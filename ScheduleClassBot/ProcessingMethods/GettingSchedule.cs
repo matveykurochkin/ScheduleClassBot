@@ -37,12 +37,6 @@ internal class GettingSchedule : ICheckMessage
     private string? _addedToResponseText;
 
     /// <summary>
-    /// массив, содержащий дни недели для группы ПМИ, пример: "Среда ПМИ-120"
-    /// </summary>
-    internal static readonly string[] DayOfWeekPmi =
-        { BotConstants.MondayPmi, BotConstants.TuesdayPmi, BotConstants.WednesdayPmi, BotConstants.ThursdayPmi, BotConstants.FridayPmi };
-
-    /// <summary>
     /// массив, содержащий дни недели для группы ПРИ, пример: "Среда ПРИ-121"
     /// </summary>
     internal static readonly string[] DayOfWeekPri =
@@ -144,82 +138,6 @@ internal class GettingSchedule : ICheckMessage
             sb.AppendLine($"{item.pair} {item.time}");
             sb.AppendLine($"{item.lesson}");
             sb.AppendLine($"{item.teacher}");
-        }
-    }
-    
-    /// <summary>
-    /// Главный метод, который обрабатывет все возможные варианты из сетки запросов расписания, работает для группы ПМИ-120
-    /// </summary>
-    /// <param name="botClient"></param>
-    /// <param name="message"></param>
-    /// <param name="textMessage">полученное сообщение от пользователя</param>
-    // ReSharper disable once InconsistentNaming
-    internal async Task GetScheduleForGroupPMI(ITelegramBotClient botClient, Message message, string textMessage)
-    {
-        try
-        {
-            // Получаем путь к текущей директории, из которой выполняется приложение
-            var currentDirectory = Directory.GetCurrentDirectory();
-            // Относительный путь к файлу JSON
-            var jsonFilePath = Path.Combine(currentDirectory, "Schedule", "PMI120.json");
-            var jsonString = await File.ReadAllTextAsync(jsonFilePath);
-            // Десериализация в список объектов типа Timetable
-            var timetableList = JsonConvert.DeserializeObject<List<Timetable>>(jsonString);
-
-            var today = DateTime.Now.DayOfWeek;
-            _addedToResponseText = ISOWeek.GetWeekOfYear(DateTime.Now) % 2 == 0
-                ? $"❗Текущая неделя: {BotConstants.Denominator}❗\n\n"
-                : $"❗Текущая неделя: {BotConstants.Numerator}❗\n\n";
-
-            if (CheckingMessageText(textMessage, BotConstants.ScheduleForPmiToday)
-                || CheckingMessageText(textMessage, BotConstants.CommandTodayPmi))
-                textMessage = GetTodaySchedule(DayOfWeekPmi, today);
-
-            if (CheckingMessageText(textMessage, BotConstants.ScheduleForPmiTomorrow)
-                || CheckingMessageText(textMessage, BotConstants.CommandTomorrowPmi))
-                textMessage = GetTomorrowSchedule(DayOfWeekPmi, today);
-
-            // Поиск соответствующего дня в расписании
-            var selectedTimetable = timetableList!.Find(t => t.day == textMessage);
-
-            // Формирование строки с расписанием
-            var scheduleString = GetScheduleString(selectedTimetable!);
-
-            if (DayOfWeekPmi.Contains(textMessage))
-            {
-                switch (textMessage)
-                {
-                    case BotConstants.MondayPmi:
-                        await botClient.SendTextMessageAsync(message.Chat,
-                            $"{_addedToResponseText}\ud83d\udcccРасписание на Понедельник\n\n" +
-                            $"{scheduleString}");
-                        break;
-                    case BotConstants.TuesdayPmi:
-                        await botClient.SendTextMessageAsync(message.Chat,
-                            $"{_addedToResponseText}📌Расписание на Вторник\n\n" +
-                            $"{scheduleString}");
-                        break;
-                    case BotConstants.WednesdayPmi:
-                        await botClient.SendTextMessageAsync(message.Chat,
-                            $"{_addedToResponseText}📌Расписание на Среду\n\n" +
-                            $"{scheduleString}");
-                        break;
-                    case BotConstants.ThursdayPmi:
-                        await botClient.SendTextMessageAsync(message.Chat,
-                            $"{_addedToResponseText}📌Расписание на Четверг\n\n" +
-                            $"{scheduleString}");
-                        break;
-                    case BotConstants.FridayPmi:
-                        await botClient.SendTextMessageAsync(message.Chat,
-                            $"{_addedToResponseText}📌Расписание на Пятницу\n\n" +
-                            $"{scheduleString}");
-                        break;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("Error view schedule for group PMI. {method}: {error}", nameof(GetScheduleForGroupPMI), ex);
         }
     }
 

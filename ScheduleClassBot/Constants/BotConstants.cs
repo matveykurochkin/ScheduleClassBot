@@ -8,12 +8,6 @@
 public static class BotConstants
 {
     #region Day Of Week all group
-
-    public const string MondayPmi = "Понедельник ПМИ-120";
-    public const string TuesdayPmi = "Вторник ПМИ-120";
-    public const string WednesdayPmi = "Среда ПМИ-120";
-    public const string ThursdayPmi = "Четверг ПМИ-120";
-    public const string FridayPmi = "Пятница ПМИ-120";
     
     public const string MondayPri = "Понедельник ПРИ-121";
     public const string TuesdayPri = "Вторник ПРИ-121";
@@ -41,9 +35,6 @@ public static class BotConstants
     #region Bot Commands
 
     public const string CommandStart = "/start";
-    public const string CommandTodayPmi = "/todaypmi";
-    public const string CommandTomorrowPmi = "/tomorrowpmi";
-    public const string CommandSessionPmi = "/sessionpmi";
     public const string CommandTodayPri = "/todaypri";
     public const string CommandTomorrowPri = "/tomorrowpri";
     public const string CommandSessionPri = "/sessionpri";
@@ -53,11 +44,8 @@ public static class BotConstants
 
     #region Schedule for
 
-    public const string ScheduleForPmiToday = "Расписание на сегодня ПМИ-120";
-    public const string ScheduleForPmiTomorrow = "Расписание на завтра ПМИ-120";
     public const string ScheduleForPriToday = "Расписание на сегодня ПРИ-121";
     public const string ScheduleForPriTomorrow = "Расписание на завтра ПРИ-121";
-    public const string ScheduleSessionForPmi = "Расписание сессии ПМИ-120";
     public const string ScheduleSessionForPri = "Расписание сессии ПРИ-121";
     public const string ScheduleToday = "Расписание на сегодня";
     public const string ScheduleTomorrow = "Расписание на завтра";
@@ -73,8 +61,7 @@ public static class BotConstants
     #endregion
 
     #region Group
-
-    public const string GroupPmi = "ПМИ-120";
+    
     public const string GroupPri = "ПРИ-121";
 
     #endregion
@@ -88,16 +75,9 @@ public static class BotConstants
 
     #endregion
 
-    #region Like & Dislike
-
-    public const string Like = "like";
-    public const string DisLike = "dislike";
-
-    #endregion
-
     #region Count Messages For Present
 
-    public const double PresentPercent = 3;
+    public const double PresentPercent = 1;
     public const double PresentPercentWithoutDb = 50;
 
     #endregion

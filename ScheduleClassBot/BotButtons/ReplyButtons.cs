@@ -15,7 +15,6 @@ internal class ReplyButtons
         {
             new[]
             {
-                new KeyboardButton(BotConstants.GroupPmi),
                 new KeyboardButton(BotConstants.GroupPri)
             }
         })

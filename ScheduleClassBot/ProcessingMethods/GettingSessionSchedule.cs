@@ -45,43 +45,6 @@ internal class GettingSessionSchedule
         }
         return result.ToString();
     }
-    
-    /// <summary>
-    /// Метод, показывающий расписание сессии группы ПМИ-120
-    /// </summary>
-    /// <param name="botClient"></param>
-    /// <param name="message"></param>
-    /// <param name="cancellationToken"></param>
-    public async Task GetSessionOnPMI(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Получаем путь к текущей директории, из которой выполняется приложение
-            var currentDirectory = Directory.GetCurrentDirectory();
-            // Относительный путь к файлу JSON
-            var jsonFilePath = Path.Combine(currentDirectory, "Schedule", "PMI120Session.json");
-            // Читаем содержимое файла JSON
-            var jsonString = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
-            // Десериализация в объект типа SessionSchedule
-            var sessionData = JsonConvert.DeserializeObject<List<ExamSchedule>>(jsonString);
-            // Получаем строку расписания сессии
-            var sessionScheduleString = FormatExamSchedules(sessionData!);
-            
-            await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПМИ-120📌\n\n" +
-                                                               $"{sessionScheduleString}",
-                cancellationToken: cancellationToken);
-            
-            // await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПМИ-120📌" +
-            //                                                    $"Расписание экзаменационной сессии будет доступно позднее!",
-            //     cancellationToken: cancellationToken);
-
-            Logger.Info("View session schedule for group PMI success!");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error view session schedule for group PMI. Error message: {ex.Message}");
-        }
-    }
 
     /// <summary>
     /// Метод, показывающий расписание сессии группы ПРИ-121

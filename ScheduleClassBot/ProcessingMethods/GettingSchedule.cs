@@ -40,13 +40,13 @@ internal class GettingSchedule : ICheckMessage
     /// массив, содержащий дни недели для группы ПРИ, пример: "Среда ПРИ-121"
     /// </summary>
     internal static readonly string[] DayOfWeekPri =
-        { BotConstants.MondayPri, BotConstants.TuesdayPri, BotConstants.WednesdayPri, BotConstants.ThursdayPri, BotConstants.FridayPri };
+        [BotConstants.MondayPri, BotConstants.TuesdayPri, BotConstants.WednesdayPri, BotConstants.ThursdayPri, BotConstants.FridayPri];
 
     /// <summary>
     /// массив, содержащий дни недели 
     /// </summary>
     private static readonly string[] DayOfWeek =
-        { BotConstants.Monday, BotConstants.Tuesday, BotConstants.Wednesday, BotConstants.Thursday, BotConstants.Friday, BotConstants.Saturday, BotConstants.Sunday };
+        [BotConstants.Monday, BotConstants.Tuesday, BotConstants.Wednesday, BotConstants.Thursday, BotConstants.Friday, BotConstants.Saturday, BotConstants.Sunday];
 
     /// <summary>
     /// Метод, сравнивающий полученный текст с необходимым, без учета регистра

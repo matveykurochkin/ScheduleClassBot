@@ -45,13 +45,16 @@ internal class ReplyButtons
             },
             new[]
             {
-                new KeyboardButton($"Пятница {nameGroup}"),
-                new KeyboardButton($"{BotConstants.ScheduleSession} {nameGroup}")
+                new KeyboardButton($"Пятница {nameGroup}")
             },
             new[]
             {
                 new KeyboardButton($"{BotConstants.ScheduleToday} {nameGroup}"),
                 new KeyboardButton($"{BotConstants.ScheduleTomorrow} {nameGroup}")
+            },
+            new[]
+            {
+                new KeyboardButton($"{BotConstants.ScheduleSession} {nameGroup}")
             },
             new[]
             {

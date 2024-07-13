@@ -7,19 +7,8 @@ using Telegram.Bot.Polling;
 
 namespace ScheduleClassBot.StartupServiceSettings;
 
-internal class BotRunService : IHostedService
+internal class BotRunService(BotSettingsConfiguration configuration, MessageHandler messageHandler, CallbackQueryHandler callbackQueryHandler) : IHostedService
 {
-    private readonly BotSettingsConfiguration _configuration;
-    private readonly MessageHandler _messageHandler;
-    private readonly CallbackQueryHandler _callbackQueryHandler;
-
-    public BotRunService(BotSettingsConfiguration configuration, MessageHandler messageHandler, CallbackQueryHandler callbackQueryHandler)
-    {
-        _configuration = configuration;
-        _messageHandler = messageHandler;
-        _callbackQueryHandler = callbackQueryHandler;
-    }
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -31,8 +20,8 @@ internal class BotRunService : IHostedService
     {
         try
         {
-            var handler = new MainHandler(_messageHandler, _callbackQueryHandler);
-            var token = _configuration.BotToken;
+            var handler = new MainHandler(messageHandler, callbackQueryHandler);
+            var token = configuration.BotToken;
             TelegramBotClient? telegramBot = default;
             if (token is { TelegramBotToken: not null })
                 telegramBot = new TelegramBotClient(token.TelegramBotToken);

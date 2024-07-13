@@ -11,15 +11,8 @@ using Telegram.Bot.Types.Enums;
 
 namespace ScheduleClassBot.ProcessingMethods;
 
-internal class GettingSpecialCommands : ICheckMessage
+internal class GettingSpecialCommands(BotSettingsConfiguration configuration) : ICheckMessage
 {
-    private readonly BotSettingsConfiguration _configuration;
-
-    public GettingSpecialCommands(BotSettingsConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     internal static long CountMessage;
@@ -82,7 +75,7 @@ internal class GettingSpecialCommands : ICheckMessage
     {
         try
         {
-            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
             await connection.OpenAsync(cancellationToken);
 
             const string selectFromBotUsers = "SELECT * FROM botusers";
@@ -119,7 +112,7 @@ internal class GettingSpecialCommands : ICheckMessage
             var callbackQuery = update.CallbackQuery;
             var chatId = callbackQuery!.Message!.Chat.Id;
 
-            if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+            if (configuration.IsWorkWithDb(configuration.DataBase!.ConnectionString))
             {
                 await GetUsersListFromDb(botClient, callbackQuery, chatId, cancellationToken);
                 return;
@@ -167,32 +160,151 @@ internal class GettingSpecialCommands : ICheckMessage
     {
         try
         {
-            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
             await connection.OpenAsync(cancellationToken);
 
-            const string countMessagesFromDb = "SELECT Count(*) FROM messages;";
-
+            // Общее количество сообщений
+            const string countMessagesFromDb = "SELECT COUNT(*) FROM messages;";
             await using var commandCountMessages = new NpgsqlCommand(countMessagesFromDb, connection);
             var countMessage = (long)(await commandCountMessages.ExecuteScalarAsync(cancellationToken))!;
-            
-            const string countPresentsFromDb = "SELECT Count(*) FROM presents;";
 
+            // Общее количество подарков
+            const string countPresentsFromDb = "SELECT COUNT(*) FROM presents;";
             await using var commandCountPresents = new NpgsqlCommand(countPresentsFromDb, connection);
             var countPresents = (long)(await commandCountPresents.ExecuteScalarAsync(cancellationToken))!;
 
-            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
+            // Количество сообщений за текущий месяц
+            const string countMessagesCurrentMonth = @"
+                SELECT COUNT(*) 
+                FROM messages 
+                WHERE DATE_TRUNC('month', messagedate) = DATE_TRUNC('month', CURRENT_DATE);";
+            await using var commandCountMessagesCurrentMonth = new NpgsqlCommand(countMessagesCurrentMonth, connection);
+            var countMessagesCurrMonth = (long)(await commandCountMessagesCurrentMonth.ExecuteScalarAsync(cancellationToken))!;
+
+            // Количество сообщений за предыдущий месяц
+            const string countMessagesPreviousMonth = @"
+                SELECT COUNT(*) 
+                FROM messages 
+                WHERE DATE_TRUNC('month', messagedate) = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month';";
+            await using var commandCountMessagesPreviousMonth = new NpgsqlCommand(countMessagesPreviousMonth, connection);
+            var countMessagesPrevMonth = (long)(await commandCountMessagesPreviousMonth.ExecuteScalarAsync(cancellationToken))!;
+
+            // Количество подарков за текущий месяц
+            const string countPresentsCurrentMonth = @"
+                SELECT COUNT(*) 
+                FROM presents p
+                JOIN messages m ON p.id = m.id
+                WHERE DATE_TRUNC('month', m.messagedate) = DATE_TRUNC('month', CURRENT_DATE);";
+            await using var commandCountPresentsCurrentMonth = new NpgsqlCommand(countPresentsCurrentMonth, connection);
+            var countPresentsCurrMonth = (long)(await commandCountPresentsCurrentMonth.ExecuteScalarAsync(cancellationToken))!;
+
+            // Количество подарков за предыдущий месяц
+            const string countPresentsPreviousMonth = @"
+                SELECT COUNT(*) 
+                FROM presents p
+                JOIN messages m ON p.id = m.id
+                WHERE DATE_TRUNC('month', m.messagedate) = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month';";
+            await using var commandCountPresentsPreviousMonth = new NpgsqlCommand(countPresentsPreviousMonth, connection);
+            var countPresentsPrevMonth = (long)(await commandCountPresentsPreviousMonth.ExecuteScalarAsync(cancellationToken))!;
+
+            // Формирование сообщения
+            var responseMessage = 
                 $"Количество написанных сообщений боту: {countMessage}!" +
-                $"\nКоличество отправленных подарков: {countPresents}!",
-                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                $"\nКоличество отправленных подарков: {countPresents}!" +
+                $"\n\nЗа текущий месяц:" +
+                $"\n- Сообщений: {countMessagesCurrMonth}" +
+                $"\n- Подарков: {countPresentsCurrMonth}" +
+                $"\n\nЗа предыдущий месяц:" +
+                $"\n- Сообщений: {countMessagesPrevMonth}" +
+                $"\n- Подарков: {countPresentsPrevMonth}";
+
+            // Отправка сообщения
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId, responseMessage, replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
 
             Logger.Info("!!!SPECIAL COMMAND!!! View count message from DB success!");
         }
         catch (Exception ex)
         {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error view count message from DB. {method}: {error}", nameof(GetCountMessage), ex);
+            Logger.Error("!!!SPECIAL COMMAND!!! Error view count message from DB. {method}: {error}", nameof(GetCountMessageFromDb), ex);
         }
     }
     
+    public async Task SendJenkinsLink(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var callbackQuery = update.CallbackQuery;
+            var chatId = callbackQuery!.Message!.Chat.Id;
+            var username = callbackQuery.From.FirstName; 
+
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
+                $"{username}, держи ссылку на Jenkins!\n\n{BotConstants.Jenkins}",
+                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+            Logger.Info("!!!SPECIAL COMMAND!!! Sent Jenkins Link successfully!");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("!!!SPECIAL COMMAND!!! Error sending Jenkins Link. {method}: {error}", nameof(SendJenkinsLink), ex);
+        }
+    }
+
+    public async Task GetLastUser(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var callbackQuery = update.CallbackQuery;
+            var chatId = callbackQuery!.Message!.Chat.Id;
+            var username = callbackQuery.From.FirstName;
+
+            await using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
+            await connection.OpenAsync(cancellationToken);
+
+            const string selectLastUserFromDb = "SELECT userid FROM messages ORDER BY id DESC LIMIT 1;";
+
+            await using var commandSelectLastUser = new NpgsqlCommand(selectLastUserFromDb, connection);
+            await using var reader = await commandSelectLastUser.ExecuteReaderAsync(cancellationToken);
+
+            if (!reader.HasRows || !await reader.ReadAsync(cancellationToken))
+            {
+                await botClient.SendTextMessageAsync(chatId, "Нет данных о последнем пользователе.", cancellationToken: cancellationToken);
+                return;
+            }
+
+            var userId = reader.GetInt64(reader.GetOrdinal("userid"));
+
+            await using var connectionUserById = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
+            await connectionUserById.OpenAsync(cancellationToken);
+
+            var selectUserById = $"SELECT * FROM botusers WHERE id = @userId;";
+            await using var commandSelectUserById = new NpgsqlCommand(selectUserById, connectionUserById);
+            commandSelectUserById.Parameters.AddWithValue("userId", userId);
+
+            await using var readerSelectUserById = await commandSelectUserById.ExecuteReaderAsync(cancellationToken);
+
+            if (!readerSelectUserById.HasRows || !await readerSelectUserById.ReadAsync(cancellationToken))
+            {
+                await botClient.SendTextMessageAsync(chatId, "Нет данных о пользователе с данным ID.", cancellationToken: cancellationToken);
+                return;
+            }
+
+            var userInfo = $"{username}, последний пользователь, который написал боту!\n\n" +
+                           $"Id: {readerSelectUserById["id"]}\n" +
+                           $"Name: {readerSelectUserById["name"]}\n" +
+                           $"Surname: {readerSelectUserById["surname"]}\n" +
+                           $"Username: {readerSelectUserById["username"]}\n";
+
+            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId, userInfo,
+                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+
+            Logger.Info("!!!SPECIAL COMMAND!!! Get last user success!");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("!!!SPECIAL COMMAND!!! Error getting last user. {method}: {error}", nameof(GetLastUser), ex);
+        }
+    }
+
+  
     /// <summary>
     /// Метод, позволяющий получить количество отправленных ботом подарков,
     /// количество написанных сообщений, и юзернейм последнего написавшего человека боту
@@ -206,7 +318,7 @@ internal class GettingSpecialCommands : ICheckMessage
         var chatId = callbackQuery!.Message!.Chat.Id;
         try
         {
-            if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+            if (configuration.IsWorkWithDb(configuration.DataBase!.ConnectionString))
             {
                 await GetCountMessageFromDb(botClient, callbackQuery, chatId, cancellationToken);
                 return;

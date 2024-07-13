@@ -68,16 +68,19 @@ public static class BotConstants
 
     #region Special commands
 
-    public const string SpecialCommandForViewAllSpecialCommand = "specialcommandforviewbuttonwithlistallspecialcommands";
+    public const string SpecialCommandForViewAllSpecialCommand = "sc";
     public const string SpecialCommandForGetLogFile = "specialcommandforgetlogfile";
     public const string SpecialCommandForViewListUsers = "specialcommandforviewlistusers";
     public const string SpecialCommandForViewCountMessages = "specialcommandforviewcountmessages";
-
+    public const string JenkinsLink = "jenkinslink";
+    public const string Jenkins = "http://79.137.198.66:8080";
+    public const string LastUser = "lastuser";
+        
     #endregion
 
     #region Count Messages For Present
 
-    public const double PresentPercent = 1;
+    public const double PresentPercent = 2;
     public const double PresentPercentWithoutDb = 50;
 
     #endregion

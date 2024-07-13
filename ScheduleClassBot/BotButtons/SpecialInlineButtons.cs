@@ -15,7 +15,19 @@ internal class SpecialInlineButtons
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Просмотр списка пользователей", callbackData: BotConstants.SpecialCommandForViewListUsers)
+                InlineKeyboardButton.WithCallbackData(text: "Все пользователи", callbackData: BotConstants.SpecialCommandForViewListUsers)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Последний пользователь", callbackData: BotConstants.LastUser)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Статистика сообщений", callbackData: BotConstants.SpecialCommandForViewCountMessages)
+            },
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData(text: "Jenkins", callbackData: BotConstants.JenkinsLink)
             },
             new[]
             {

@@ -1,7 +1,6 @@
 ﻿using ScheduleClassBot.ProcessingMethods;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 using NLog;
 using ScheduleClassBot.Configuration;
 using ScheduleClassBot.Constants;
@@ -9,20 +8,9 @@ using ScheduleClassBot.Interfaces;
 
 namespace ScheduleClassBot.Handlers;
 
-internal class CallbackQueryHandler : ICheckMessage
+internal class CallbackQueryHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands) : ICheckMessage
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-    private readonly BotSettingsConfiguration _configuration;
-    private readonly GettingSpecialCommands _gettingSpecialCommands;
-
-    public CallbackQueryHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands)
-    {
-        _configuration = configuration;
-        _gettingSpecialCommands = gettingSpecialCommands;
-    }
-
-    private static ulong CountLike { get; set; }
 
     /// <summary>
     /// Метод, сравнивающий полученный текст с необходимым, без учета регистра
@@ -48,23 +36,35 @@ internal class CallbackQueryHandler : ICheckMessage
 
         if (update.CallbackQuery?.Data is not null)
         {
-            if (_configuration.UserId?.IdUser!.Contains(chatId) == true)
+            if (configuration.UserId?.IdUser!.Contains(chatId) == true)
             {
                 if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewListUsers))
                 {
-                    await _gettingSpecialCommands.GetUsersList(botClient, update, cancellationToken);
+                    await gettingSpecialCommands.GetUsersList(botClient, update, cancellationToken);
                     return;
                 }
 
                 if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.SpecialCommandForViewCountMessages))
                 {
-                    await _gettingSpecialCommands.GetCountMessage(botClient, update, cancellationToken);
+                    await gettingSpecialCommands.GetCountMessage(botClient, update, cancellationToken);
+                    return;
+                }
+                
+                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.JenkinsLink))
+                {
+                    await gettingSpecialCommands.SendJenkinsLink(botClient, update, cancellationToken);
+                    return;
+                }
+                
+                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.LastUser))
+                {
+                    await gettingSpecialCommands.GetLastUser(botClient, update, cancellationToken);
                     return;
                 }
 
                 if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.CommandBack))
                 {
-                    await _gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);
+                    await gettingSpecialCommands.BackInSpecialCommands(botClient, update, cancellationToken);
                     return;
                 }
 

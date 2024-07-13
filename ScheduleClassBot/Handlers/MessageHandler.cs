@@ -11,17 +11,8 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ScheduleClassBot.Handlers;
 
-internal class MessageHandler : ICheckMessage
+internal class MessageHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands) : ICheckMessage
 {
-    private readonly BotSettingsConfiguration _configuration;
-    private readonly GettingSpecialCommands _gettingSpecialCommands;
-
-    public MessageHandler(BotSettingsConfiguration configuration, GettingSpecialCommands gettingSpecialCommands)
-    {
-        _configuration = configuration;
-        _gettingSpecialCommands = gettingSpecialCommands;
-    }
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly GettingSessionSchedule _gettingSession = new();
@@ -39,7 +30,7 @@ internal class MessageHandler : ICheckMessage
             const string insertMessage = "INSERT INTO messages (USERID, TEXT, ID, MESSAGEDATE)" +
                                          "VALUES (@userid, @text, @id, @messagedate);";
 
-            using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
             using var command = new NpgsqlCommand(insertMessage, connection);
 
             command.Parameters.AddWithValue("@userid", message.From?.Id!);
@@ -72,7 +63,7 @@ internal class MessageHandler : ICheckMessage
                                            "ON CONFLICT (id) DO UPDATE " +
                                            "SET name = EXCLUDED.name, surname = EXCLUDED.surname, username = EXCLUDED.username;";
 
-            using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
             using var command = new NpgsqlCommand(insertNewPeople, connection);
 
             command.Parameters.AddWithValue("@id", message.From?.Id!);
@@ -104,7 +95,7 @@ internal class MessageHandler : ICheckMessage
             const string insertPresent = "INSERT INTO presents (userid, id, text) " +
                                          "VALUES (@userid, @id, @text);";
 
-            await using var connection = new NpgsqlConnection(_configuration.DataBase!.ConnectionString);
+            await using var connection = new NpgsqlConnection(configuration.DataBase!.ConnectionString);
             await using var command = new NpgsqlCommand(insertPresent, connection);
 
             command.Parameters.AddWithValue("@userid", message.From?.Id!);
@@ -168,7 +159,7 @@ internal class MessageHandler : ICheckMessage
     /// <returns>true, если id текущего пользователя есть в файле конфигурации, false - во всех остальных случаях</returns>
     private bool CheckingUserId(long? userId)
     {
-        var idUser = _configuration.UserId!.IdUser!.ToArray();
+        var idUser = configuration.UserId!.IdUser!.ToArray();
         return idUser.Any(x => x == userId);
     }
 
@@ -225,7 +216,7 @@ internal class MessageHandler : ICheckMessage
             $"\n\tID Пользователя: {message.From?.Id}" +
             $"\n\tUsername: @{message.From?.Username}");
 
-        if (_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+        if (configuration.IsWorkWithDb(configuration.DataBase!.ConnectionString))
         {
              SaveUserForDb(message);
              SaveMessageForDb(message);
@@ -269,7 +260,7 @@ internal class MessageHandler : ICheckMessage
         if (message.Text!.Contains(botUsername))
             message.Text = message.Text.Replace(botUsername, "").Trim();
         
-        if (!_configuration.IsWorkWithDb(_configuration.DataBase!.ConnectionString))
+        if (!configuration.IsWorkWithDb(configuration.DataBase!.ConnectionString))
         {
             SaveNewUser(message);
             GettingSpecialCommands.IncrementCountMessage();
@@ -320,14 +311,14 @@ internal class MessageHandler : ICheckMessage
             if (message.Text.StartsWith(BotConstants.SpecialCommandForViewAllSpecialCommand)
                 && CheckingUserId(message.From?.Id))
             {
-                await _gettingSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
+                await gettingSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);
                 return;
             }
 
             if (message.Text.StartsWith(BotConstants.SpecialCommandForGetLogFile)
                 && CheckingUserId(message.From?.Id))
             {
-                await _gettingSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
+                await gettingSpecialCommands.GetLogFile(botClient, update, message, cancellationToken);
                 return;
             }
 

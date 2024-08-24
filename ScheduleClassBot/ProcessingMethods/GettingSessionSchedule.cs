@@ -66,6 +66,9 @@ internal class GettingSessionSchedule
             var sessionData = JsonConvert.DeserializeObject<List<ExamSchedule>>(jsonString);
             // Получаем строку расписания сессии
             var sessionScheduleString = FormatExamSchedules(sessionData!);
+
+            if (sessionScheduleString == "")
+                sessionScheduleString = "Будет доступно позднее!";
             
             await botClient.SendTextMessageAsync(message.Chat, $"📌Расписание сессии группы ПРИ-121📌\n\n" +
                                                                $"{sessionScheduleString}",

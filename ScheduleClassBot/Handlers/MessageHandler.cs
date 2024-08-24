@@ -308,7 +308,7 @@ internal class MessageHandler(BotSettingsConfiguration configuration, GettingSpe
                 return;
             }
 
-            if (message.Text.StartsWith(BotConstants.SpecialCommandForViewAllSpecialCommand)
+            if (message.Text.Equals(BotConstants.SpecialCommandForViewAllSpecialCommand, StringComparison.CurrentCultureIgnoreCase)
                 && CheckingUserId(message.From?.Id))
             {
                 await gettingSpecialCommands.GetButtonWithSpecialCommands(botClient, message, cancellationToken);

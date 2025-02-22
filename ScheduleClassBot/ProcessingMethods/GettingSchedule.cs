@@ -162,8 +162,8 @@ internal class GettingSchedule : ICheckMessage
             
             var today = DateTime.Now.DayOfWeek;
             _addedToResponseText = ISOWeek.GetWeekOfYear(DateTime.Now) % 2 == 0
-                ? $"❗Текущая неделя: {BotConstants.Denominator}❗\n\n"
-                : $"❗Текущая неделя: {BotConstants.Numerator}❗\n\n";
+                ? $"❗Текущая неделя: {BotConstants.Numerator}❗\n\n"
+                : $"❗Текущая неделя: {BotConstants.Denominator}❗\n\n";
 
             if (CheckingMessageText(textMessage, BotConstants.ScheduleForPriToday)
                 || CheckingMessageText(textMessage, BotConstants.CommandTodayPri))

@@ -236,10 +236,11 @@ internal class GettingSpecialCommands(BotSettingsConfiguration configuration) : 
             var callbackQuery = update.CallbackQuery;
             var chatId = callbackQuery!.Message!.Chat.Id;
             var username = callbackQuery.From.FirstName; 
-
-            await botClient.EditMessageTextAsync(chatId, callbackQuery.Message!.MessageId,
+            
+            await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
                 $"{username}, держи ссылку на Jenkins!\n\n{BotConstants.Jenkins}",
-                replyMarkup: _specialInlineButtons.SpecialBackInlineButton(), cancellationToken: cancellationToken);
+                showAlert: true, cancellationToken: cancellationToken);
+
             Logger.Info("!!!SPECIAL COMMAND!!! Sent Jenkins Link successfully!");
         }
         catch (Exception ex)

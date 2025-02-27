@@ -72,8 +72,6 @@ public static class BotConstants
     public const string SpecialCommandForGetLogFile = "specialcommandforgetlogfile";
     public const string SpecialCommandForViewListUsers = "specialcommandforviewlistusers";
     public const string SpecialCommandForViewCountMessages = "specialcommandforviewcountmessages";
-    public const string JenkinsLink = "jenkinslink";
-    public const string Jenkins = "http://79.137.198.66:8080";
     public const string LastUser = "lastuser";
         
     #endregion

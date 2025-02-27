@@ -27,10 +27,6 @@ internal class SpecialInlineButtons
             },
             new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Jenkins", callbackData: BotConstants.JenkinsLink)
-            },
-            new[]
-            {
                 InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(text: "Получение логов", query: BotConstants.SpecialCommandForGetLogFile)
             }
         });

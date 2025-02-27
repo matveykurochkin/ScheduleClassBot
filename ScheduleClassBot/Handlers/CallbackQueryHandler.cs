@@ -50,12 +50,6 @@ internal class CallbackQueryHandler(BotSettingsConfiguration configuration, Gett
                     return;
                 }
                 
-                if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.JenkinsLink))
-                {
-                    await gettingSpecialCommands.SendJenkinsLink(botClient, update, cancellationToken);
-                    return;
-                }
-                
                 if (CheckingMessageText(update.CallbackQuery?.Data!, BotConstants.LastUser))
                 {
                     await gettingSpecialCommands.GetLastUser(botClient, update, cancellationToken);

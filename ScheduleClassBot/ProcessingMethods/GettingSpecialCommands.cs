@@ -228,26 +228,6 @@ internal class GettingSpecialCommands(BotSettingsConfiguration configuration) : 
             Logger.Error("!!!SPECIAL COMMAND!!! Error view count message from DB. {method}: {error}", nameof(GetCountMessageFromDb), ex);
         }
     }
-    
-    public async Task SendJenkinsLink(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var callbackQuery = update.CallbackQuery;
-            var chatId = callbackQuery!.Message!.Chat.Id;
-            var username = callbackQuery.From.FirstName; 
-            
-            await botClient.AnswerCallbackQueryAsync(callbackQuery.Id,
-                $"{username}, держи ссылку на Jenkins!\n\n{BotConstants.Jenkins}",
-                showAlert: true, cancellationToken: cancellationToken);
-
-            Logger.Info("!!!SPECIAL COMMAND!!! Sent Jenkins Link successfully!");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("!!!SPECIAL COMMAND!!! Error sending Jenkins Link. {method}: {error}", nameof(SendJenkinsLink), ex);
-        }
-    }
 
     public async Task GetLastUser(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {

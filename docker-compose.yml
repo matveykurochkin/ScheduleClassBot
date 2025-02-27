@@ -1,0 +1,34 @@
+﻿networks:
+  botnet:
+
+services:
+  
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: schedulebotdb
+    networks:
+      - botnet
+    restart: always
+    volumes:
+      - C:/Docker:/backup
+    
+  scheduleclassbot:
+    container_name: schedule-class-bot8-container
+    image: schedule-class-bot8
+    build:
+      context: .
+      dockerfile: ScheduleClassBot/Dockerfile
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: schedulebotdb
+    networks:
+      - botnet
+    restart: always
+    depends_on:
+      - postgres

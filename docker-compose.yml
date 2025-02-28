@@ -19,7 +19,9 @@ services:
   schedule-class-bot8:
     container_name: schedule-class-bot8-container
     image: schedule-class-bot8
-    build: ./ScheduleClassBot
+    build:
+      context: .
+      dockerfile: ScheduleClassBot/Dockerfile
     networks:
       - botnet
     restart: always

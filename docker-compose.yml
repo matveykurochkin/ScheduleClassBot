@@ -16,17 +16,10 @@ services:
     volumes:
       - C:/Docker:/backup
     
-  scheduleclassbot:
+  schedule-class-bot8:
     container_name: schedule-class-bot8-container
     image: schedule-class-bot8
-    build:
-      context: .
-      dockerfile: ScheduleClassBot/Dockerfile
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_USER: root
-      DATABASE_PASSWORD: root
-      DATABASE_NAME: schedulebotdb
+    build: ./ScheduleClassBot
     networks:
       - botnet
     restart: always
